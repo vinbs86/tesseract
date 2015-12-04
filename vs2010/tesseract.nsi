@@ -22,13 +22,29 @@ SetCompressorDictSize 32
 !define SRCDIR .
 !endif
 !ifndef VERSION
-!define VERSION 3.02.02
+!define VERSION 3.05-dev
 !endif
 !define PRODUCT_NAME "Tesseract-OCR"
 !define PRODUCT_VERSION "${VERSION}"
 !define PRODUCT_PUBLISHER "Tesseract-OCR community"
-!define PRODUCT_WEB_SITE "http://code.google.com/p/tesseract-ocr"
+!define PRODUCT_WEB_SITE "https://github.com/tesseract-ocr/tesseract"
+; FIXME
 !define FILE_URL "http://tesseract-ocr.googlecode.com/files/"
+!define GITHUB_RAW_FILE_URL "https://raw.githubusercontent.com/tesseract-ocr/tessdata/master"
+
+!ifdef CROSSBUILD
+!addincludedir ${SRCDIR}\nsis\include
+!addplugindir ${SRCDIR}\nsis\plugins
+!ifdef SHARED
+!define APIDIR "..\api\.libs"
+!else
+!define APIDIR "..\api"
+!endif
+!define TRAININGDIR "..\training"
+!else
+!define APIDIR "LIB_Release"
+!define TRAININGDIR "LIB_Release"
+!endif
 
 # General Definitions
 Name "${PRODUCT_NAME} ${VERSION} for Windows"
@@ -58,8 +74,8 @@ BrandingText /TRIMCENTER "(c) 2010-2012 Tesseract-OCR "
 !define MUI_HEADERIMAGE
 !define MUI_HEADERIMAGE_BITMAP_NOSTRETCH
 !define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\modern-install-blue-full.ico"
-!define MUI_FINISHPAGE_LINK "http://code.google.com/p/tesseract-ocr/"
-!define MUI_FINISHPAGE_LINK_LOCATION "http://code.google.com/p/tesseract-ocr/"
+!define MUI_FINISHPAGE_LINK "https://github.com/tesseract-ocr/tesseract"
+!define MUI_FINISHPAGE_LINK_LOCATION "https://github.com/tesseract-ocr/tesseract"
 !define MUI_FINISHPAGE_NOAUTOCLOSE
 !define MUI_FINISHPAGE_SHOWREADME "notepad $INSTDIR\doc\README"
 !define MUI_FINISHPAGE_SHOWREADME_FUNCTION ShowReadme
@@ -76,11 +92,7 @@ BrandingText /TRIMCENTER "(c) 2010-2012 Tesseract-OCR "
 !include MultiUser.nsh
 !include Sections.nsh
 !include MUI2.nsh
-!ifdef CROSSBUILD
-!include ${SRCDIR}/vs2010/EnvVarUpdate.nsh
-!else
 !include EnvVarUpdate.nsh
-!endif
 !include LogicLib.nsh
 !include winmessages.nsh # include for some of the windows messages defines
 
@@ -169,22 +181,10 @@ OutFile tesseract-ocr-setup.exe
 !macroend
 
 !macro Download_Lang_Data Lang
-  IfFileExists $TEMP/${Lang} dlok
-  ;StrCpy $1 ${Lang}
-  ;StrCpy $2 "$INSTDIR\tessdata\$1"
-  ;inetc::get /caption "Downloading $1" /popup "" "${FILE_URL}/$1" $2 /end
-  inetc::get /caption "Downloading ${Lang}" /popup "" "${FILE_URL}/${Lang}" $TEMP/${Lang} /end
+  inetc::get /caption "Downloading ${Lang}" /popup "" "${GITHUB_RAW_FILE_URL}/${Lang}" $INSTDIR/tessdata/${Lang} /end
     Pop $0 # return value = exit code, "OK" if OK
-    StrCmp $0 "OK" dlok
+    StrCmp $0 "OK" +1
     MessageBox MB_OK|MB_ICONEXCLAMATION "http download error. Download Status of ${Lang}: $0. Click OK to continue." /SD IDOK
-    Goto error
-  dlok:
-    DetailPrint "Extracting ${Lang}"
-    untgz::extract "-j" "-d" "$INSTDIR\tessdata\" "$TEMP/${Lang}"
-    # tarbal has to be created with option --old-archive otherwise there will be error
-    # untgz::extract failed because of checksum
-  error:
-    Delete "$TEMP\${Lang}"
 !macroend
 
 !macro Download_Leptonica DataUrl
@@ -195,7 +195,9 @@ OutFile tesseract-ocr-setup.exe
     MessageBox MB_OK|MB_ICONEXCLAMATION "http download error. Download Status of $1: $R0. Click OK to continue." /SD IDOK
     Goto error
   dlok:
+!ifndef CROSSBUILD
     nsisunz::UnzipToLog "$TEMP/leptonica.zip" "$INSTDIR"
+!endif
     Pop $R0
     StrCmp $R0 "success" +2
         MessageBox MB_OK "Decompression of leptonica failed: $R0"
@@ -220,7 +222,7 @@ OutFile tesseract-ocr-setup.exe
 
 !macro Download_Data2 Filename Komp
   IfFileExists $TEMP/${Filename} dlok
-  inetc::get /caption "Downloading $1" /popup "" "${FILE_URL}/${Filename}" $TEMP/${Filename} /end
+    inetc::get /caption "Downloading $1" /popup "" "${FILE_URL}/${Filename}" $TEMP/${Filename} /end
     Pop $R0 # return value = exit code, "OK" if OK
     StrCmp $R0 "OK" dlok
     MessageBox MB_OK|MB_ICONEXCLAMATION "http download error. Download Status of $1: $R0. Click OK to continue." /SD IDOK
@@ -228,12 +230,16 @@ OutFile tesseract-ocr-setup.exe
   dlok:
     ${If} ${Komp} == "tgz"
         DetailPrint "Extracting ${Filename}"
+!ifndef CROSSBUILD
         untgz::extract "-d" "$INSTDIR\.." "$TEMP\${Filename}"
+!endif
         Goto install
     ${EndIf}
     ${If} ${Komp} == "zip"
         DetailPrint "Extracting ${Filename}"
+!ifndef CROSSBUILD
         nsisunz::UnzipToLog "$TEMP\${Filename}" "$INSTDIR\"
+!endif
         Goto install
     ${EndIf}
      MessageBox MB_OK|MB_ICONEXCLAMATION "Unsupported compression!"
@@ -255,11 +261,15 @@ OutFile tesseract-ocr-setup.exe
     Goto end
   dlok:
     ${If} ${Komp} == "tgz"
+!ifndef CROSSBUILD
         untgz::extract "-d" "$INSTDIR" "$TEMP\${Filename}"
+!endif
         Goto install
     ${EndIf}
     ${If} ${Komp} == "zip"
+!ifndef CROSSBUILD
         nsisunz::UnzipToLog "$TEMP\${Filename}" "$INSTDIR"
+!endif
         Goto install
     ${EndIf}
      MessageBox MB_OK|MB_ICONEXCLAMATION "Unsupported compression!"
@@ -282,13 +292,12 @@ Section -Main SEC0000
   SectionIn RO
   SetOutPath "$INSTDIR"
   # files included in distribution
+  File ${APIDIR}\tesseract.exe
 !ifdef CROSSBUILD
-  File ..\api\tesseract.exe
-!else
-  File LIB_Release\tesseract.exe
+  File ${SRCDIR}\dll\i686-w64-mingw32\*.dll
 !endif
-  File gzip.exe
-  File tar.exe
+  File ${SRCDIR}\vs2010\gzip.exe
+  File ${SRCDIR}\vs2010\tar.exe
   CreateDirectory "$INSTDIR\java"
   SetOutPath "$INSTDIR\java"
   File ..\java\ScrollView.jar
@@ -332,15 +341,15 @@ SectionEnd
 Section "Traning Tools" SecTr
   SectionIn 1
   SetOutPath "$INSTDIR"
-  File LIB_Release\cntraining.exe
-  File LIB_Release\combine_tessdata.exe
-  File LIB_Release\mftraining.exe
-  File LIB_Release\unicharset_extractor.exe
-  File LIB_Release\wordlist2dawg.exe
-  File LIB_Release\classifier_tester.exe
-  File LIB_Release\dawg2wordlist.exe
-  File LIB_Release\ambiguous_words.exe
-  File LIB_Release\shapeclustering.exe
+  File ${TRAININGDIR}\cntraining.exe
+  File ${TRAININGDIR}\combine_tessdata.exe
+  File ${TRAININGDIR}\mftraining.exe
+  File ${TRAININGDIR}\unicharset_extractor.exe
+  File ${TRAININGDIR}\wordlist2dawg.exe
+  File ${TRAININGDIR}\classifier_tester.exe
+  File ${TRAININGDIR}\dawg2wordlist.exe
+  File ${TRAININGDIR}\ambiguous_words.exe
+  File ${TRAININGDIR}\shapeclustering.exe
 SectionEnd
 
 Section -post SEC0001
@@ -363,7 +372,7 @@ Section -post SEC0001
   WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" NoRepair 1
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
-  ;ExecShell "open" "http://code.google.com/p/tesseract-ocr/"
+  ;ExecShell "open" "https://github.com/tesseract-ocr/tesseract"
   ;ExecShell "open" '"$INSTDIR"'
   ;BringToFront
 SectionEnd
@@ -391,7 +400,7 @@ SectionGroupEnd
 
 SectionGroup "Tesseract development files" SecGrp_dev
     Section /o "Download and install tesseract libraries including header files" SecLang_tlib
-    !insertmacro Download_Data2 tesseract-ocr-3.02.02-win32-lib-include-dirs.zip zip
+    !insertmacro Download_Data2 tesseract-ocr-${VERSION}-win32-lib-include-dirs.zip zip
     CopyFiles $INSTDIR\lib\libtesseract*.dll $INSTDIR\  ; $INSTDIR is in the path!
     Delete $INSTDIR\lib\libtesseract*.dll
     SectionEnd
@@ -404,13 +413,13 @@ SectionGroup "Tesseract development files" SecGrp_dev
     !insertmacro Download_Data2 tesseract-ocr-API-Example-vs2008.zip zip
     SectionEnd
     Section /o "Download and install tesseract source code" SecLang_source
-    !insertmacro Download_Data tesseract-ocr-3.02.02.tar.gz tgz
+    !insertmacro Download_Data tesseract-ocr-${VERSION}.tar.gz tgz
     SectionEnd
     Section /o "Download and install VS C++ 2008 solution for tesseract" SecLang_vs2008
     !insertmacro Download_Data tesseract-ocr-3.02-vs2008.zip zip
     SectionEnd
     Section /o "Download and install doxygen documentation for tesseract" SecLang_doxygen
-    !insertmacro Download_Data tesseract-ocr-3.02.02-doc-html.tar.gz tgz
+    !insertmacro Download_Data tesseract-ocr-${VERSION}-doc-html.tar.gz tgz
     CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\DoxygenDoc.lnk" "$INSTDIR\tesseract-ocr\doc\html\index.html"
     SectionEnd
 SectionGroupEnd
@@ -420,13 +429,13 @@ SectionGroup "Language data" SecGrp_LD
     Section "English language data" SecLang_eng
     SectionIn RO
       SetOutPath "$INSTDIR\tessdata"
-      File ..\tessdata\eng.*
+      File ${SRCDIR}\tessdata\eng.*
     SectionEnd
 
     Section "Orientation and script detection data" SecLang_osd
     SectionIn 1
       SetOutPath "$INSTDIR\tessdata"
-     File ..\tessdata\osd.*
+      File ${SRCDIR}\tessdata\osd.*
     SectionEnd
 
     Section /o "Download and install Math / equation detection module" SecLang_equ
@@ -513,12 +522,16 @@ SectionGroup "Language data" SecGrp_LD
     !insertmacro Download_Lang_Data tesseract-ocr-3.02.est.tar.gz
     SectionEnd
 
-    Section /o "Download and install German language data" SecLang_deu
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.deu.tar.gz
+    Section "Download and install German language data" SecLang_deu
+    SectionIn 1
+      SetOutPath "$INSTDIR\tessdata"
+      File ${SRCDIR}\tessdata\deu.*
     SectionEnd
 
-    Section /o "Download and install German (Fraktur) language data" SecLang_deu_frak
-    !insertmacro Download_Lang_Data_gz deu-frak.traineddata.gz
+    Section "Download and install German (Fraktur) language data" SecLang_deu_frak
+    SectionIn 1
+      SetOutPath "$INSTDIR\tessdata"
+      File ${SRCDIR}\tessdata\deu_frak.*
     SectionEnd
 
     Section /o "Download and install Greek language data" SecLang_ell
@@ -538,7 +551,15 @@ SectionGroup "Language data" SecGrp_LD
     SectionEnd
 
     Section /o "Download and install French language data" SecLang_fra
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.fra.tar.gz
+      !insertmacro Download_Lang_Data fra.cube.bigrams
+      !insertmacro Download_Lang_Data fra.cube.fold
+      !insertmacro Download_Lang_Data fra.cube.lm
+      !insertmacro Download_Lang_Data fra.cube.nn
+      !insertmacro Download_Lang_Data fra.cube.params
+      !insertmacro Download_Lang_Data fra.cube.size
+      !insertmacro Download_Lang_Data fra.cube.word-freq
+      !insertmacro Download_Lang_Data fra.tesseract_cube.nn
+      !insertmacro Download_Lang_Data fra.traineddata
     SectionEnd
 
     Section /o "Download and install French - Middle(ca. 1400-1600) language data" SecLang_frm
@@ -784,7 +805,7 @@ Function .onInit
   StrCmp $R0 "" test1 test2
   test1:
     ReadRegStr $R0 HKLM "${REGKEY}" "CurrentVersion"
-    StrCpy $OLD_KEY HKLM
+    StrCpy $OLD_KEY "$R0"
     StrCmp $R0 "" SkipUnInstall
   test2:
     MessageBox MB_YESNO|MB_ICONEXCLAMATION "Tesseract-ocr version $R0 is installed (in $OLD_KEY)! Do you want to uninstall it first?$\nUninstall will delete all files in '$INSTDIR'!" \
