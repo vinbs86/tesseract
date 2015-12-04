@@ -11,11 +11,19 @@
 ; See the License for the specific language governing permissions and
 ; limitations under the License.
 
+!define CROSSBUILD
+
 SetCompressor /FINAL /SOLID lzma
 ;SetCompressor lzma
 SetCompressorDictSize 32
 
+; Settings which normally should be passed as command line arguments.
+!ifndef SRCDIR
+!define SRCDIR .
+!endif
+!ifndef VERSION
 !define VERSION 3.02.02
+!endif
 !define PRODUCT_NAME "Tesseract-OCR"
 !define PRODUCT_VERSION "${VERSION}"
 !define PRODUCT_PUBLISHER "Tesseract-OCR community"
@@ -25,7 +33,10 @@ SetCompressorDictSize 32
 # General Definitions
 Name "${PRODUCT_NAME} ${VERSION} for Windows"
 Caption "Tesseract-OCR ${VERSION}"
+!ifndef CROSSBUILD
 BrandingText /TRIMCENTER "(c) 2010-2012 Tesseract-OCR "
+!endif
+
 !define REGKEY "SOFTWARE\${PRODUCT_NAME}"
 ; HKLM (all users) vs HKCU (current user) defines
 !define env_hklm 'HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"'
@@ -65,7 +76,11 @@ BrandingText /TRIMCENTER "(c) 2010-2012 Tesseract-OCR "
 !include MultiUser.nsh
 !include Sections.nsh
 !include MUI2.nsh
+!ifdef CROSSBUILD
+!include ${SRCDIR}/vs2010/EnvVarUpdate.nsh
+!else
 !include EnvVarUpdate.nsh
+!endif
 !include LogicLib.nsh
 !include winmessages.nsh # include for some of the windows messages defines
 
@@ -77,7 +92,7 @@ Var OLD_KEY
 
 # Installer pages
 !insertmacro MUI_PAGE_WELCOME
-!insertmacro MUI_PAGE_LICENSE "..\COPYING"
+!insertmacro MUI_PAGE_LICENSE "${SRCDIR}\COPYING"
 !insertmacro MULTIUSER_PAGE_INSTALLMODE
 !ifdef VERSION
   Page custom PageReinstall PageLeaveReinstall
@@ -267,7 +282,11 @@ Section -Main SEC0000
   SectionIn RO
   SetOutPath "$INSTDIR"
   # files included in distribution
+!ifdef CROSSBUILD
+  File ..\api\tesseract.exe
+!else
   File LIB_Release\tesseract.exe
+!endif
   File gzip.exe
   File tar.exe
   CreateDirectory "$INSTDIR\java"
@@ -276,38 +295,38 @@ Section -Main SEC0000
   CreateDirectory "$INSTDIR\tessdata"
   CreateDirectory "$INSTDIR\tessdata\configs"
   SetOutPath "$INSTDIR\tessdata\configs"
-  File ..\tessdata\configs\ambigs.train
-  File ..\tessdata\configs\api_config
-  File ..\tessdata\configs\bigram
-  File ..\tessdata\configs\box.train
-  File ..\tessdata\configs\box.train.stderr
-  File ..\tessdata\configs\digits
-  File ..\tessdata\configs\hocr
-  File ..\tessdata\configs\inter
-  File ..\tessdata\configs\kannada
-  File ..\tessdata\configs\linebox
-  File ..\tessdata\configs\logfile
-  File ..\tessdata\configs\makebox
-  File ..\tessdata\configs\quiet
-  File ..\tessdata\configs\rebox
-  File ..\tessdata\configs\strokewidth
-  File ..\tessdata\configs\unlv
+  File ${SRCDIR}\tessdata\configs\ambigs.train
+  File ${SRCDIR}\tessdata\configs\api_config
+  File ${SRCDIR}\tessdata\configs\bigram
+  File ${SRCDIR}\tessdata\configs\box.train
+  File ${SRCDIR}\tessdata\configs\box.train.stderr
+  File ${SRCDIR}\tessdata\configs\digits
+  File ${SRCDIR}\tessdata\configs\hocr
+  File ${SRCDIR}\tessdata\configs\inter
+  File ${SRCDIR}\tessdata\configs\kannada
+  File ${SRCDIR}\tessdata\configs\linebox
+  File ${SRCDIR}\tessdata\configs\logfile
+  File ${SRCDIR}\tessdata\configs\makebox
+  File ${SRCDIR}\tessdata\configs\quiet
+  File ${SRCDIR}\tessdata\configs\rebox
+  File ${SRCDIR}\tessdata\configs\strokewidth
+  File ${SRCDIR}\tessdata\configs\unlv
   CreateDirectory "$INSTDIR\tessdata\tessconfigs"
   SetOutPath "$INSTDIR\tessdata\tessconfigs"
-  File ..\tessdata\tessconfigs\batch
-  File ..\tessdata\tessconfigs\batch.nochop
-  File ..\tessdata\tessconfigs\matdemo
-  File ..\tessdata\tessconfigs\msdemo
-  File ..\tessdata\tessconfigs\nobatch
-  File ..\tessdata\tessconfigs\segdemo
+  File ${SRCDIR}\tessdata\tessconfigs\batch
+  File ${SRCDIR}\tessdata\tessconfigs\batch.nochop
+  File ${SRCDIR}\tessdata\tessconfigs\matdemo
+  File ${SRCDIR}\tessdata\tessconfigs\msdemo
+  File ${SRCDIR}\tessdata\tessconfigs\nobatch
+  File ${SRCDIR}\tessdata\tessconfigs\segdemo
   CreateDirectory "$INSTDIR\doc"
   SetOutPath "$INSTDIR\doc"
-  File ..\AUTHORS
-  File ..\COPYING
-  File ..\eurotext.tif
-  File ..\phototest.tif
-  File ..\README
-  File ..\ReleaseNotes
+  File ${SRCDIR}\AUTHORS
+  File ${SRCDIR}\COPYING
+  File ${SRCDIR}\testing\eurotext.tif
+  File ${SRCDIR}\testing\phototest.tif
+  File ${SRCDIR}\testing\README
+  File ${SRCDIR}\ReleaseNotes
 SectionEnd
 
 Section "Traning Tools" SecTr
