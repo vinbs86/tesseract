@@ -21,11 +21,13 @@ if !NO_CUBE_BUILD
     SUBDIRS += neural_networks/runtime cube
 endif
 SUBDIRS += ccmain api . tessdata doc
+if MINGW
 SUBDIRS += nsis
+endif
 
 EXTRA_DIST = README.md\
 	aclocal.m4 config configure.ac autogen.sh contrib \
-	tesseract.pc.in $(TRAINING_SUBDIR) java doc testing nsis
+	tesseract.pc.in $(TRAINING_SUBDIR) java doc testing
 
 DIST_SUBDIRS  = $(SUBDIRS) $(TRAINING_SUBDIR)
 
@@ -66,9 +68,10 @@ doc-pack: doc
 doc-clean:
 	rm -rf $(top_srcdir)/doc/html/*
 
-.PHONY: winsetup
+if MINGW
 winsetup:
-	@cd "$(top_builddir)/nsis" && $(MAKE)
+	@cd "$(top_builddir)/nsis" && $(MAKE) winsetup
+endif
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = tesseract.pc
