@@ -36,21 +36,21 @@ SCROLLVIEW_CLASSES = \
 	com/google/scrollview/ScrollView.class
 
 SCROLLVIEW_LIBS = \
-	$(srcdir)/piccolo2d-core-3.0.jar \
-	$(srcdir)/piccolo2d-extras-3.0.jar
+	$(srcdir)/piccolo2d-core-3.1-SNAPSHOT.jar \
+	$(srcdir)/piccolo2d-extras-3.1-SNAPSHOT.jar
 
-CLASSPATH = $(srcdir)/piccolo2d-core-3.0.jar:$(srcdir)/piccolo2d-extras-3.0.jar
+CLASSPATH = $(srcdir)/piccolo2d-core-3.1-SNAPSHOT.jar:$(srcdir)/piccolo2d-extras-3.1-SNAPSHOT.jar
 
 ScrollView.jar : $(SCROLLVIEW_CLASSES)
-	$(JAR) cfm $@ Manifest.txt com/google/scrollview/*.class \
+	$(JAR) cfm $@ $(srcdir)/Manifest.txt com/google/scrollview/*.class \
            com/google/scrollview/events/*.class com/google/scrollview/ui/*.class
 
 $(SCROLLVIEW_CLASSES) : $(SCROLLVIEW_FILES)
 	$(JAVAC) -encoding UTF8 -sourcepath $(srcdir) -classpath $(CLASSPATH) $(SCROLLVIEW_FILES) -d $(builddir)
 
 fetch-jars :
-	curl -L http://search.maven.org/remotecontent?filepath=org/piccolo2d/piccolo2d-core/3.0/piccolo2d-core-3.0.jar > piccolo2d-core-3.0.jar
-	curl -L http://search.maven.org/remotecontent?filepath=org/piccolo2d/piccolo2d-extras/3.0/piccolo2d-extras-3.0.jar > piccolo2d-extras-3.0.jar
+	curl -L http://search.maven.org/remotecontent?filepath=org/piccolo2d/piccolo2d-core/3.0/piccolo2d-core-3.1-SNAPSHOT.jar > piccolo2d-core-3.1-SNAPSHOT.jar
+	curl -L http://search.maven.org/remotecontent?filepath=org/piccolo2d/piccolo2d-extras/3.0/piccolo2d-extras-3.1-SNAPSHOT.jar > piccolo2d-extras-3.1-SNAPSHOT.jar
 
 .PHONY: install-jars
 install-jars : ScrollView.jar
