@@ -21,10 +21,11 @@ endif
 
 SUBDIRS = arch ccutil viewer cutil opencl ccstruct dict classify wordrec textord lstm
 SUBDIRS += ccmain api . tessdata doc
+SUBDIRS += nsis
 
 EXTRA_DIST = README.md\
 	aclocal.m4 config configure.ac autogen.sh contrib \
-	tesseract.pc.in $(TRAINING_SUBDIR) java doc testing
+	tesseract.pc.in $(TRAINING_SUBDIR) java doc testing nsis
 
 DIST_SUBDIRS  = $(SUBDIRS) $(TRAINING_SUBDIR)
 
@@ -64,6 +65,10 @@ doc-pack: doc
 
 doc-clean:
 	rm -rf $(top_srcdir)/doc/html/*
+
+.PHONY: winsetup
+winsetup:
+	@cd "$(top_builddir)/nsis" && $(MAKE)
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = tesseract.pc
