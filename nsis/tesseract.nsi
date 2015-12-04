@@ -36,11 +36,11 @@ SetCompressorDictSize 32
 !addincludedir ${SRCDIR}\nsis\include
 !addplugindir ${SRCDIR}\nsis\plugins
 !ifdef SHARED
-!define APIDIR "..\api\.libs"
+!define APIDIR "../api/.libs"
 !else
-!define APIDIR "..\api"
+!define APIDIR "../api"
 !endif
-!define TRAININGDIR "..\training"
+!define TRAININGDIR "../training"
 !else
 !define APIDIR "LIB_Release"
 !define TRAININGDIR "LIB_Release"
@@ -296,8 +296,8 @@ Section -Main SEC0000
 !ifdef CROSSBUILD
   File ${SRCDIR}\dll\i686-w64-mingw32\*.dll
 !endif
-  File ${SRCDIR}\vs2010\gzip.exe
-  File ${SRCDIR}\vs2010\tar.exe
+  File ${SRCDIR}\nsis\gzip.exe
+  File ${SRCDIR}\nsis\tar.exe
   CreateDirectory "$INSTDIR\java"
   SetOutPath "$INSTDIR\java"
   File ..\java\ScrollView.jar
@@ -338,17 +338,17 @@ Section -Main SEC0000
   File ${SRCDIR}\ReleaseNotes
 SectionEnd
 
-Section "Traning Tools" SecTr
+Section "Training Tools" SecTr
   SectionIn 1
   SetOutPath "$INSTDIR"
+  File ${TRAININGDIR}\ambiguous_words.exe
+  File ${TRAININGDIR}\classifier_tester.exe
   File ${TRAININGDIR}\cntraining.exe
   File ${TRAININGDIR}\combine_tessdata.exe
+  File ${TRAININGDIR}\dawg2wordlist.exe
   File ${TRAININGDIR}\mftraining.exe
   File ${TRAININGDIR}\unicharset_extractor.exe
   File ${TRAININGDIR}\wordlist2dawg.exe
-  File ${TRAININGDIR}\classifier_tester.exe
-  File ${TRAININGDIR}\dawg2wordlist.exe
-  File ${TRAININGDIR}\ambiguous_words.exe
   File ${TRAININGDIR}\shapeclustering.exe
 SectionEnd
 
@@ -570,7 +570,7 @@ SectionGroup "Language data" SecGrp_LD
     !insertmacro Download_Lang_Data tesseract-ocr-3.02.heb.tar.gz
     SectionEnd
 
-    Section /o "Download and install Hebrew (community traning) language data" SecLang_heb_com
+    Section /o "Download and install Hebrew (community training) language data" SecLang_heb_com
     !insertmacro Download_Lang_Data tesseract-ocr-3.01.heb-com.tar.gz
     SectionEnd
 
