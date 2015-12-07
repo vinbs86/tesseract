@@ -24,6 +24,9 @@
 #else
 #include          <io.h>
 #endif
+#ifdef _WIN32
+#include <libgen.h>
+#endif
 #include          <stdlib.h>
 #include          "ccutil.h"
 
@@ -62,19 +65,17 @@ void CCUtil::main_setup(const char *argv0, const char *basename) {
     /* Use tessdata prefix from the environment. */
     datadir = tessdata_prefix;
 #if defined(_WIN32)
-  } else if (datadir == NULL || access(datadir.string(), 0) != 0) {
+  } else if (datadir == NULL || access(datadir.string(), F_OK) != 0) {
     /* Look for tessdata in directory of executable. */
-    static char dir[128];
     static char exe[128];
     DWORD length = GetModuleFileName(NULL, exe, sizeof(exe));
-    if (length > 0 && length < sizeof(exe)) {
-      _splitpath(exe, NULL, dir, NULL, NULL);
-      datadir = dir;
+    if (length > 0 && length + 9 < sizeof(exe)) {
+      datadir = dirname(exe);
     }
 #endif /* _WIN32 */
 #if defined(TESSDATA_PREFIX)
   } else {
-/* Use tessdata prefix which was compiled in. */
+    /* Use tessdata prefix which was compiled in. */
 #define _STR(a) #a
 #define _XSTR(a) _STR(a)
     datadir = _XSTR(TESSDATA_PREFIX);
