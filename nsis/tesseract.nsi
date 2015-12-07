@@ -181,7 +181,7 @@ OutFile tesseract-ocr-setup.exe
 !macro Download_Lang_Data Lang
   inetc::get /caption "Downloading ${Lang}" /popup "" "${GITHUB_RAW_FILE_URL}/${Lang}" $INSTDIR/tessdata/${Lang} /end
     Pop $0 # return value = exit code, "OK" if OK
-    StrCmp $0 "OK" +1
+    StrCmp $0 "OK" +2
     MessageBox MB_OK|MB_ICONEXCLAMATION "http download error. Download Status of ${Lang}: $0. Click OK to continue." /SD IDOK
 !macroend
 
@@ -202,20 +202,6 @@ OutFile tesseract-ocr-setup.exe
         Goto error
   error:
     Delete "$TEMP\leptonica.zip"
-!macroend
-
-!macro Download_Lang_Data_gz Lang
-  ;IfFileExists $TEMP/${Lang} dlok
-  StrCpy $1 ${Lang}
-  StrCpy $2 "$INSTDIR\tessdata\$1"
-  inetc::get /caption "Downloading $1" /popup "" "http://tesseract-ocr.googlecode.com/files/$1" $2 /end
-    Pop $0 # return value = exit code, "OK" if OK
-    StrCmp $0 "OK" dlok
-    MessageBox MB_OK|MB_ICONEXCLAMATION "http download error. Download Status of $1: $0. Click OK to continue." /SD IDOK
-    Goto error
-  dlok:
-    ExecWait  '"$INSTDIR\gzip.exe" -d "$2"'
-  error:
 !macroend
 
 !macro Download_Data2 Filename Komp
@@ -297,7 +283,6 @@ Section -Main SEC0000
 !ifdef CROSSBUILD
   File ${SRCDIR}\dll\i686-w64-mingw32\*.dll
 !endif
-  File ${SRCDIR}\nsis\gzip.exe
   File ${SRCDIR}\nsis\tar.exe
   CreateDirectory "$INSTDIR\java"
   SetOutPath "$INSTDIR\java"
@@ -443,118 +428,157 @@ SectionGroup "Language data" SecGrp_LD
     SectionEnd
 
     Section /o "Download and install Math / equation detection module" SecLang_equ
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.equ.tar.gz
+    !insertmacro Download_Lang_Data equ.traineddata
     SectionEnd
 
     ; https://github.com/tesseract-ocr/tesseract/blob/master/doc/tesseract.1.asc#languages
     ; afr (Afrikaans) amh (Amharic) ara (Arabic) asm (Assamese) aze (Azerbaijani) aze_cyrl (Azerbaijani - Cyrilic) bel (Belarusian) ben (Bengali) bod (Tibetan) bos (Bosnian) bul (Bulgarian) cat (Catalan; Valencian) ceb (Cebuano) ces (Czech) chi_sim (Chinese - Simplified) chi_tra (Chinese - Traditional) chr (Cherokee) cym (Welsh) dan (Danish) dan_frak (Danish - Fraktur) deu (German) deu_frak (German - Fraktur) dzo (Dzongkha) ell (Greek, Modern (1453-)) eng (English) enm (English, Middle (1100-1500)) epo (Esperanto) equ (Math / equation detection module) est (Estonian) eus (Basque) fas (Persian) fin (Finnish) fra (French) frk (Frankish) frm (French, Middle (ca.1400-1600)) gle (Irish) glg (Galician) grc (Greek, Ancient (to 1453)) guj (Gujarati) hat (Haitian; Haitian Creole) heb (Hebrew) hin (Hindi) hrv (Croatian) hun (Hungarian) iku (Inuktitut) ind (Indonesian) isl (Icelandic) ita (Italian) ita_old (Italian - Old) jav (Javanese) jpn (Japanese) kan (Kannada) kat (Georgian) kat_old (Georgian - Old) kaz (Kazakh) khm (Central Khmer) kir (Kirghiz; Kyrgyz) kor (Korean) kur (Kurdish) lao (Lao) lat (Latin) lav (Latvian) lit (Lithuanian) mal (Malayalam) mar (Marathi) mkd (Macedonian) mlt (Maltese) msa (Malay) mya (Burmese) nep (Nepali) nld (Dutch; Flemish) nor (Norwegian) ori (Oriya) osd (Orientation and script detection module) pan (Panjabi; Punjabi) pol (Polish) por (Portuguese) pus (Pushto; Pashto) ron (Romanian; Moldavian; Moldovan) rus (Russian) san (Sanskrit) sin (Sinhala; Sinhalese) slk (Slovak) slk_frak (Slovak - Fraktur) slv (Slovenian) spa (Spanish; Castilian) spa_old (Spanish; Castilian - Old) sqi (Albanian) srp (Serbian) srp_latn (Serbian - Latin) swa (Swahili) swe (Swedish) syr (Syriac) tam (Tamil) tel (Telugu) tgk (Tajik) tgl (Tagalog) tha (Thai) tir (Tigrinya) tur (Turkish) uig (Uighur; Uyghur) ukr (Ukrainian) urd (Urdu) uzb (Uzbek) uzb_cyrl (Uzbek - Cyrilic) vie (Vietnamese) yid (Yiddish)
 
     Section /o "Download and install Afrikaans language data" SecLang_afr
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.afr.tar.gz
+    !insertmacro Download_Lang_Data afr.traineddata
     SectionEnd
 
     Section /o "Download and install Albanian language data" SecLang_sqi
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.sqi.tar.gz
+    !insertmacro Download_Lang_Data sqi.traineddata
+    SectionEnd
+
+    Section /o "Download and install Amharic language data" SecLang_amh
+    !insertmacro Download_Lang_Data amh.traineddata
     SectionEnd
 
     Section /o "Download and install Arabic language data" SecLang_ara
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.ara.tar.gz
+    !insertmacro Download_Lang_Data ara.cube.bigrams
+    !insertmacro Download_Lang_Data ara.cube.fold
+    !insertmacro Download_Lang_Data ara.cube.lm
+    !insertmacro Download_Lang_Data ara.cube.nn
+    !insertmacro Download_Lang_Data ara.cube.params
+    !insertmacro Download_Lang_Data ara.cube.size
+    !insertmacro Download_Lang_Data ara.cube.word-freq
+    !insertmacro Download_Lang_Data ara.traineddata
+    SectionEnd
+
+    Section /o "Download and install Assamese language data" SecLang_asm
+    !insertmacro Download_Lang_Data asm.traineddata
     SectionEnd
 
     Section /o "Download and install Azerbaijani language data" SecLang_aze
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.aze.tar.gz
+    !insertmacro Download_Lang_Data aze.traineddata
+    SectionEnd
+
+    Section /o "Download and install Azerbaijani (Cyrilic) language data" SecLang_aze_cyrl
+    !insertmacro Download_Lang_Data aze_cyrl.traineddata
     SectionEnd
 
     Section /o "Download and install Basque language data" SecLang_eus
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.eus.tar.gz
+    !insertmacro Download_Lang_Data eus.traineddata
     SectionEnd
 
     Section /o "Download and install Belarusian language data" SecLang_bel
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.bel.tar.gz
+    !insertmacro Download_Lang_Data bel.traineddata
     SectionEnd
 
     Section /o "Download and install Bengali language data" SecLang_ben
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.ben.tar.gz
+    !insertmacro Download_Lang_Data ben.traineddata
+    SectionEnd
+
+    Section /o "Download and install Tibetan language data" SecLang_bod
+    !insertmacro Download_Lang_Data bod.traineddata
+    SectionEnd
+
+    Section /o "Download and install Bosnian language data" SecLang_bos
+    !insertmacro Download_Lang_Data bos.traineddata
     SectionEnd
 
     Section /o "Download and install Bulgarian language data" SecLang_bul
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.bul.tar.gz
+    !insertmacro Download_Lang_Data bul.traineddata
     SectionEnd
 
     Section /o "Download and install Catalan language data" SecLang_cat
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.cat.tar.gz
+    !insertmacro Download_Lang_Data cat.traineddata
+    SectionEnd
+
+    Section /o "Download and install Cebuano language data" SecLang_ceb
+    !insertmacro Download_Lang_Data ceb.traineddata
     SectionEnd
 
     Section /o "Download and install Cherokee language data" SecLang_chr
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.chr.tar.gz
+    !insertmacro Download_Lang_Data chr.traineddata
     SectionEnd
 
     Section /o "Download and install Chinese (Traditional) language data" SecLang_chi_tra
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.chi_tra.tar.gz
+    !insertmacro Download_Lang_Data chi_tra.traineddata
     SectionEnd
 
     Section /o "Download and install Chinese (Simplified) language data" SecLang_chi_sim
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.chi_sim.tar.gz
+    !insertmacro Download_Lang_Data chi_sim.traineddata
     SectionEnd
 
     Section /o "Download and install Croatian language data" SecLang_hrv
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.hrv.tar.gz
+    !insertmacro Download_Lang_Data hrv.traineddata
     SectionEnd
 
     Section /o "Download and install Czech language data" SecLang_ces
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.ces.tar.gz
+    !insertmacro Download_Lang_Data ces.traineddata
+    SectionEnd
+
+    Section /o "Download and install Welsh language data" SecLang_cym
+    !insertmacro Download_Lang_Data cym.traineddata
     SectionEnd
 
     Section /o "Download and install Danish language data" SecLang_dan
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.dan.tar.gz
+    !insertmacro Download_Lang_Data dan.traineddata
     SectionEnd
 
     Section /o "Download and install Danish (Fraktur) language data" SecLang_dan_frak
-    !insertmacro Download_Lang_Data_gz dan-frak.traineddata.gz
+    !insertmacro Download_Lang_Data dan_frak.traineddata
     SectionEnd
 
     Section /o "Download and install Dutch language data" SecLang_nld
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.nld.tar.gz
+    !insertmacro Download_Lang_Data nld.traineddata
     SectionEnd
 
     Section /o "Download and install English - Middle (1100-1500) language data" SecLang_enm
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.enm.tar.gz
+    !insertmacro Download_Lang_Data enm.traineddata
     SectionEnd
 
     Section /o "Download and install Esperanto language data" SecLang_epo
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.epo.tar.gz
+    !insertmacro Download_Lang_Data epo.traineddata
     SectionEnd
 
     Section /o "Download and install Estonian language data" SecLang_est
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.est.tar.gz
+    !insertmacro Download_Lang_Data est.traineddata
     SectionEnd
 
     Section "Download and install German language data" SecLang_deu
-    SectionIn 1
-      SetOutPath "$INSTDIR\tessdata"
-      File ${SRCDIR}\tessdata\deu.*
+    !insertmacro Download_Lang_Data deu.traineddata
     SectionEnd
 
     Section "Download and install German (Fraktur) language data" SecLang_deu_frak
-    SectionIn 1
-      SetOutPath "$INSTDIR\tessdata"
-      File ${SRCDIR}\tessdata\deu_frak.*
+    !insertmacro Download_Lang_Data deu_frak.traineddata
+    SectionEnd
+
+    Section "Download and install Dzongkha language data" SecLang_dzo
+    !insertmacro Download_Lang_Data dzo.traineddata
     SectionEnd
 
     Section /o "Download and install Greek language data" SecLang_ell
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.ell.tar.gz
+    !insertmacro Download_Lang_Data ell.traineddata
     SectionEnd
 
     Section /o "Download and install Greek - Ancient language data" SecLang_grc
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.grc.tar.gz
+    !insertmacro Download_Lang_Data grc.traineddata
+    SectionEnd
+
+    Section /o "Download and install Persian language data" SecLang_fas
+    !insertmacro Download_Lang_Data fas.traineddata
     SectionEnd
 
     Section /o "Download and install Finnish language data" SecLang_fin
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.fin.tar.gz
+    !insertmacro Download_Lang_Data fin.traineddata
     SectionEnd
 
     Section /o "Download and install Frankish language data" SecLang_frk
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.frk.tar.gz
+    !insertmacro Download_Lang_Data frk.traineddata
     SectionEnd
 
     Section /o "Download and install French language data" SecLang_fra
@@ -570,159 +594,307 @@ SectionGroup "Language data" SecGrp_LD
     SectionEnd
 
     Section /o "Download and install French - Middle(ca. 1400-1600) language data" SecLang_frm
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.frm.tar.gz
+    !insertmacro Download_Lang_Data frm.traineddata
+    SectionEnd
+
+    Section /o "Download and install Irish language data" SecLang_gle
+    !insertmacro Download_Lang_Data gle.traineddata
+    SectionEnd
+
+    Section /o "Download and install Galician language data" SecLang_glg
+    !insertmacro Download_Lang_Data glg.traineddata
+    SectionEnd
+
+    Section /o "Download and install Gujarati language data" SecLang_guj
+    !insertmacro Download_Lang_Data guj.traineddata
+    SectionEnd
+
+    Section /o "Download and install Haitian language data" SecLang_hat
+    !insertmacro Download_Lang_Data hat.traineddata
     SectionEnd
 
     Section /o "Download and install Hebrew language data" SecLang_heb
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.heb.tar.gz
-    SectionEnd
-
-    Section /o "Download and install Hebrew (community training) language data" SecLang_heb_com
-    !insertmacro Download_Lang_Data tesseract-ocr-3.01.heb-com.tar.gz
+    !insertmacro Download_Lang_Data heb.traineddata
     SectionEnd
 
     Section /o "Download and install Hindi language data" SecLang_hin
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.hin.tar.gz
+    !insertmacro Download_Lang_Data hin.cube.bigrams
+    !insertmacro Download_Lang_Data hin.cube.fold
+    !insertmacro Download_Lang_Data hin.cube.lm
+    !insertmacro Download_Lang_Data hin.cube.nn
+    !insertmacro Download_Lang_Data hin.cube.params
+    !insertmacro Download_Lang_Data hin.cube.word-freq
+    !insertmacro Download_Lang_Data hin.tesseract_cube.nn
+    !insertmacro Download_Lang_Data hin.traineddata
     SectionEnd
 
     Section /o "Download and install Hungarian language data" SecLang_hun
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.hun.tar.gz
+    !insertmacro Download_Lang_Data hun.traineddata
+    SectionEnd
+
+    Section /o "Download and install Inuktitut language data" SecLang_iku
+    !insertmacro Download_Lang_Data iku.traineddata
     SectionEnd
 
     Section /o "Download and install Icelandic language data" SecLang_isl
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.isl.tar.gz
+    !insertmacro Download_Lang_Data isl.traineddata
     SectionEnd
 
     Section /o "Download and install Indonesian language data" SecLang_ind
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.ind.tar.gz
+    !insertmacro Download_Lang_Data ind.traineddata
     SectionEnd
 
     Section /o "Download and install Italian language data" SecLang_ita
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.ita.tar.gz
+    !insertmacro Download_Lang_Data ita.cube.bigrams
+    !insertmacro Download_Lang_Data ita.cube.fold
+    !insertmacro Download_Lang_Data ita.cube.lm
+    !insertmacro Download_Lang_Data ita.cube.nn
+    !insertmacro Download_Lang_Data ita.cube.params
+    !insertmacro Download_Lang_Data ita.cube.size
+    !insertmacro Download_Lang_Data ita.cube.word-freq
+    !insertmacro Download_Lang_Data ita.tesseract_cube.nn
+    !insertmacro Download_Lang_Data ita.traineddata
     SectionEnd
 
     Section /o "Download and install Italian (Old) language data" SecLang_ita_old
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.ita_old.tar.gz
+    !insertmacro Download_Lang_Data ita_old.traineddata
+    SectionEnd
+
+    Section /o "Download and install Javanese language data" SecLang_jav
+    !insertmacro Download_Lang_Data jav.traineddata
     SectionEnd
 
     Section /o "Download and install Japanese language data" SecLang_jpn
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.jpn.tar.gz
+    !insertmacro Download_Lang_Data jpn.traineddata
     SectionEnd
 
     Section /o "Download and install Kannada language data" SecLang_kan
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.kan.tar.gz
+    !insertmacro Download_Lang_Data kan.traineddata
+    SectionEnd
+
+    Section /o "Download and install Georgian language data" SecLang_kat
+    !insertmacro Download_Lang_Data kat.traineddata
+    SectionEnd
+
+    Section /o "Download and install Georgian (Old) language data" SecLang_kat_old
+    !insertmacro Download_Lang_Data kat_old.traineddata
+    SectionEnd
+
+    Section /o "Download and install Kazakh language data" SecLang_kaz
+    !insertmacro Download_Lang_Data kaz.traineddata
+    SectionEnd
+
+    Section /o "Download and install Central Khmer language data" SecLang_khm
+    !insertmacro Download_Lang_Data khm.traineddata
+    SectionEnd
+
+    Section /o "Download and install Kirghiz language data" SecLang_kir
+    !insertmacro Download_Lang_Data kir.traineddata
     SectionEnd
 
     Section /o "Download and install Korean language data" SecLang_kor
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.kor.tar.gz
+    !insertmacro Download_Lang_Data kor.traineddata
+    SectionEnd
+
+    Section /o "Download and install Kurdish language data" SecLang_kur
+    !insertmacro Download_Lang_Data kur.traineddata
+    SectionEnd
+
+    Section /o "Download and install Lao language data" SecLang_lao
+    !insertmacro Download_Lang_Data lao.traineddata
+    SectionEnd
+
+    Section /o "Download and install Latin language data" SecLang_lat
+    !insertmacro Download_Lang_Data lat.traineddata
     SectionEnd
 
     Section /o "Download and install Latvian language data" SecLang_lav
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.lav.tar.gz
+    !insertmacro Download_Lang_Data lav.traineddata
     SectionEnd
 
     Section /o "Download and install Lithuanian language data" SecLang_lit
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.lit.tar.gz
+    !insertmacro Download_Lang_Data lit.traineddata
+    SectionEnd
+
+    Section /o "Download and install Marathi language data" SecLang_mar
+    !insertmacro Download_Lang_Data mar.traineddata
     SectionEnd
 
     Section /o "Download and install Macedonian language data" SecLang_mkd
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.mkd.tar.gz
+    !insertmacro Download_Lang_Data mkd.traineddata
     SectionEnd
 
     Section /o "Download and install Malay language data" SecLang_msa
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.msa.tar.gz
+    !insertmacro Download_Lang_Data msa.traineddata
     SectionEnd
 
     Section /o "Download and install Malayalam language data" SecLang_mal
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.mal.tar.gz
+    !insertmacro Download_Lang_Data mal.traineddata
     SectionEnd
 
     Section /o "Download and install Maltese language data" SecLang_mlt
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.mlt.tar.gz
+    !insertmacro Download_Lang_Data mlt.traineddata
+    SectionEnd
+
+    Section /o "Download and install Burmese language data" SecLang_mya
+    !insertmacro Download_Lang_Data mya.traineddata
+    SectionEnd
+
+    Section /o "Download and install Nepali language data" SecLang_nep
+    !insertmacro Download_Lang_Data nep.traineddata
     SectionEnd
 
     Section /o "Download and install Norwegian language data" SecLang_nor
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.nor.tar.gz
+    !insertmacro Download_Lang_Data nor.traineddata
+    SectionEnd
+
+    Section /o "Download and install Oriya language data" SecLang_ori
+    !insertmacro Download_Lang_Data ori.traineddata
+    SectionEnd
+
+    Section /o "Download and install Panjabi / Punjabi language data" SecLang_pan
+    !insertmacro Download_Lang_Data pan.traineddata
     SectionEnd
 
     Section /o "Download and install Polish language data" SecLang_pol
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.pol.tar.gz
+    !insertmacro Download_Lang_Data pol.traineddata
     SectionEnd
 
     Section /o "Download and install Portuguese language data" SecLang_por
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.por.tar.gz
+    !insertmacro Download_Lang_Data por.traineddata
+    SectionEnd
+
+    Section /o "Download and install Pushto / Pashto language data" SecLang_pus
+    !insertmacro Download_Lang_Data pus.traineddata
     SectionEnd
 
     Section /o "Download and install Romanian language data" SecLang_ron
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.ron.tar.gz
+    !insertmacro Download_Lang_Data ron.traineddata
     SectionEnd
 
     Section /o "Download and install Russian language data" SecLang_rus
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.rus.tar.gz
+    !insertmacro Download_Lang_Data rus.cube.fold
+    !insertmacro Download_Lang_Data rus.cube.lm
+    !insertmacro Download_Lang_Data rus.cube.nn
+    !insertmacro Download_Lang_Data rus.cube.params
+    !insertmacro Download_Lang_Data rus.cube.size
+    !insertmacro Download_Lang_Data rus.cube.word-freq
+    !insertmacro Download_Lang_Data rus.traineddata
+    SectionEnd
+
+    Section /o "Download and install Sanskrit language data" SecLang_san
+    !insertmacro Download_Lang_Data san.traineddata
+    SectionEnd
+
+    Section /o "Download and install Sinhala / Sinhalese language data" SecLang_sin
+    !insertmacro Download_Lang_Data sin.traineddata
     SectionEnd
 
     Section /o "Download and install Slovak language data" SecLang_slk
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.slk.tar.gz
+    !insertmacro Download_Lang_Data slk.traineddata
     SectionEnd
 
     Section /o "Download and install Slovak (Fraktur) language data" SecLang_slk_frak
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.slk_frak.tar.gz
+    !insertmacro Download_Lang_Data slk_frak.traineddata
     SectionEnd
 
     Section /o "Download and install Slovenian language data" SecLang_slv
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.slv.tar.gz
+    !insertmacro Download_Lang_Data slv.traineddata
     SectionEnd
 
     Section /o "Download and install Spanish language data" SecLang_spa
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.spa.tar.gz
+    !insertmacro Download_Lang_Data spa.cube.bigrams
+    !insertmacro Download_Lang_Data spa.cube.fold
+    !insertmacro Download_Lang_Data spa.cube.lm
+    !insertmacro Download_Lang_Data spa.cube.nn
+    !insertmacro Download_Lang_Data spa.cube.params
+    !insertmacro Download_Lang_Data spa.cube.size
+    !insertmacro Download_Lang_Data spa.cube.word-freq
+    !insertmacro Download_Lang_Data spa.traineddata
     SectionEnd
 
     Section /o "Download and install Spanish (Old) language data" SecLang_spa_old
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.spa_old.tar.gz
+    !insertmacro Download_Lang_Data spa_old.traineddata
     SectionEnd
 
     Section /o "Download and install Serbian language data" SecLang_srp
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.srp.tar.gz
+    !insertmacro Download_Lang_Data srp.traineddata
+    SectionEnd
+
+    Section /o "Download and install Serbian - Latin language data" SecLang_srp_latn
+    !insertmacro Download_Lang_Data srp_latn.traineddata
     SectionEnd
 
     Section /o "Download and install Swahili language data" SecLang_swa
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.swa.tar.gz
+    !insertmacro Download_Lang_Data swa.traineddata
     SectionEnd
 
     Section /o "Download and install Swedish language data" SecLang_swe
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.swe.tar.gz
+    !insertmacro Download_Lang_Data swe.traineddata
     SectionEnd
 
     Section /o "Download and install Swedish (Fraktur) language data" SecLang_swe_frak
-    !insertmacro Download_Lang_Data_gz swe-frak.traineddata.gz
+    !insertmacro Download_Lang_Data swe-frak.traineddata
+    SectionEnd
+
+    Section /o "Download and install Syriac language data" SecLang_syr
+    !insertmacro Download_Lang_Data syr.traineddata
     SectionEnd
 
     Section /o "Download and install Tagalog language data" SecLang_tgl
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.tgl.tar.gz
+    !insertmacro Download_Lang_Data tgl.traineddata
+    SectionEnd
+
+    Section /o "Download and install Tajik language data" SecLang_tgk
+    !insertmacro Download_Lang_Data tgk.traineddata
     SectionEnd
 
     Section /o "Download and install Tamil language data" SecLang_tam
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.tam.tar.gz
+    !insertmacro Download_Lang_Data tam.traineddata
     SectionEnd
 
     Section /o "Download and install Telugu language data" SecLang_tel
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.tel.tar.gz
+    !insertmacro Download_Lang_Data tel.traineddata
     SectionEnd
 
     Section /o "Download and install Thai language data" SecLang_tha
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.tha.tar.gz
+    !insertmacro Download_Lang_Data tha.traineddata
+    SectionEnd
+
+    Section /o "Download and install Tigrinya language data" SecLang_tir
+    !insertmacro Download_Lang_Data tir.traineddata
     SectionEnd
 
     Section /o "Download and install Turkish language data" SecLang_tur
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.tur.tar.gz
+    !insertmacro Download_Lang_Data tur.traineddata
+    SectionEnd
+
+    Section /o "Download and install Uighur language data" SecLang_uig
+    !insertmacro Download_Lang_Data uig.traineddata
     SectionEnd
 
     Section /o "Download and install Ukrainian language data" SecLang_ukr
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.ukr.tar.gz
+    !insertmacro Download_Lang_Data ukr.traineddata
+    SectionEnd
+
+    Section /o "Download and install Urdu language data" SecLang_urd
+    !insertmacro Download_Lang_Data urd.traineddata
+    SectionEnd
+
+    Section /o "Download and install Uzbek language data" SecLang_uzb
+    !insertmacro Download_Lang_Data uzb.traineddata
+    SectionEnd
+
+    Section /o "Download and install Uzbek (Cyrilic) language data" SecLang_uzb_cyrl
+    !insertmacro Download_Lang_Data uzb_cyrl.traineddata
     SectionEnd
 
     Section /o "Download and install Vietnamese language data" SecLang_vie
-    !insertmacro Download_Lang_Data tesseract-ocr-3.02.vie.tar.gz
+    !insertmacro Download_Lang_Data vie.traineddata
+    SectionEnd
+
+    Section /o "Download and install Yiddish language data" SecLang_yid
+    !insertmacro Download_Lang_Data yid.traineddata
     SectionEnd
 SectionGroupEnd
 
@@ -913,6 +1085,8 @@ Function .onInit
             Goto lang_end
     Arabic: !insertmacro SelectSection ${SecLang_ara}
             Goto lang_end
+    ;Assamese: !insertmacro SelectSection ${SecLang_asm}
+    ;        Goto lang_end
     Azerbaijani: !insertmacro SelectSection ${SecLang_aze}
             Goto lang_end
     Basque: !insertmacro SelectSection ${SecLang_eus}
@@ -954,7 +1128,7 @@ Function .onInit
     French: !insertmacro SelectSection ${SecLang_fra}
             Goto lang_end
     Hebrew: !insertmacro SelectSection ${SecLang_heb}
-            !insertmacro SelectSection ${SecLang_heb_com}
+            ;!insertmacro SelectSection ${SecLang_heb_com}
             Goto lang_end
     Hungarian: !insertmacro SelectSection ${SecLang_hin}
             Goto lang_end
