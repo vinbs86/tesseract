@@ -140,7 +140,7 @@ OutFile tesseract-ocr-setup.exe
 !endif
 
 !macro AddToPath
-  # TODO(zdenop): Check if $INSTDIR is in path. If yes, that do not append it
+  # TODO(zdenop): Check if $INSTDIR is in path. If yes, do not append it.
   # append bin path to user PATH environment variable
   StrCpy $PathKey "HKLM"
   StrCmp $MultiUser.InstallMode "AllUsers" +2
@@ -390,7 +390,7 @@ Section "Shortcuts creation" SecCS
   ;CreateShortCut "$QUICKLAUNCH\.lnk" "$INSTDIR\tesseract.exe" "" "$INSTDIR\tesseract.exe" 0
 SectionEnd
 
-SectionGroup "Registry setttings" SecRS
+SectionGroup "Registry settings" SecRS
     Section "Add to Path" SecRS_path
         !insertmacro AddToPath
     SectionEnd
