@@ -825,7 +825,8 @@ Function .onInit
     try_uninstall:
       ClearErrors
       ExecWait '$R1 _?=$INSTDIR'$0
-      StrCmp $0 0 0 +3   ; Check if unstaller finished ok. If yes, than try to remove it from installer
+      ; Check if unstaller finished ok. If yes, then try to remove it from installer.
+      StrCmp $0 0 0 +3
         !insertmacro REMOVE_REGKEY ${OLD_KEY}
         Goto SkipUnInstall
       messagebox mb_ok "Uninstaller failed:\n$0\n\nYou need to remove program manually."
