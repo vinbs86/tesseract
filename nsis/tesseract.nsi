@@ -394,10 +394,10 @@ Section "Shortcuts creation" SecCS
 SectionEnd
 
 SectionGroup "Registry settings" SecRS
-    Section "Add to Path" SecRS_path
+    Section /o "Add to Path" SecRS_path
         !insertmacro AddToPath
     SectionEnd
-    Section "Set TESSDATA_PREFIX variable" SecRS_tessdata
+    Section /o "Set TESSDATA_PREFIX variable" SecRS_tessdata
         !insertmacro SetTESSDATA
     SectionEnd
 SectionGroupEnd
