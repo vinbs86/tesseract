@@ -307,16 +307,19 @@ Section -Main SEC0000
   SetOutPath "$INSTDIR\tessdata\configs"
   File ${SRCDIR}\tessdata\configs\ambigs.train
   File ${SRCDIR}\tessdata\configs\api_config
+  File ${SRCDIR}\tessdata\configs\bazaar
   File ${SRCDIR}\tessdata\configs\bigram
   File ${SRCDIR}\tessdata\configs\box.train
   File ${SRCDIR}\tessdata\configs\box.train.stderr
   File ${SRCDIR}\tessdata\configs\digits
+  File ${SRCDIR}\tessdata\configs\get.image
   File ${SRCDIR}\tessdata\configs\hocr
   File ${SRCDIR}\tessdata\configs\inter
   File ${SRCDIR}\tessdata\configs\kannada
   File ${SRCDIR}\tessdata\configs\linebox
   File ${SRCDIR}\tessdata\configs\logfile
   File ${SRCDIR}\tessdata\configs\makebox
+  File ${SRCDIR}\tessdata\configs\pdf
   File ${SRCDIR}\tessdata\configs\quiet
   File ${SRCDIR}\tessdata\configs\rebox
   File ${SRCDIR}\tessdata\configs\strokewidth
