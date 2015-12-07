@@ -11,10 +11,7 @@
 ; See the License for the specific language governing permissions and
 ; limitations under the License.
 
-!define CROSSBUILD
-
 SetCompressor /FINAL /SOLID lzma
-;SetCompressor lzma
 SetCompressorDictSize 32
 
 ; Settings which normally should be passed as command line arguments.
@@ -24,6 +21,7 @@ SetCompressorDictSize 32
 !ifndef VERSION
 !define VERSION 3.05-dev
 !endif
+
 !define PRODUCT_NAME "Tesseract-OCR"
 !define PRODUCT_VERSION "${VERSION}"
 !define PRODUCT_PUBLISHER "Tesseract-OCR community"
@@ -74,7 +72,7 @@ BrandingText /TRIMCENTER "(c) 2010-2012 Tesseract-OCR "
 !define MUI_HEADERIMAGE
 !define MUI_HEADERIMAGE_BITMAP_NOSTRETCH
 !define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\modern-install-blue-full.ico"
-!define MUI_FINISHPAGE_LINK "https://github.com/tesseract-ocr/tesseract"
+!define MUI_FINISHPAGE_LINK "Tesseract on GitHub"
 !define MUI_FINISHPAGE_LINK_LOCATION "https://github.com/tesseract-ocr/tesseract"
 !define MUI_FINISHPAGE_NOAUTOCLOSE
 !define MUI_FINISHPAGE_SHOWREADME "notepad $INSTDIR\doc\README"
@@ -293,6 +291,9 @@ Section -Main SEC0000
   SetOutPath "$INSTDIR"
   # files included in distribution
   File ${APIDIR}\tesseract.exe
+!ifdef SHARED
+  File ${APIDIR}\libtesseract-3.dll
+!endif
 !ifdef CROSSBUILD
   File ${SRCDIR}\dll\i686-w64-mingw32\*.dll
 !endif
@@ -441,6 +442,9 @@ SectionGroup "Language data" SecGrp_LD
     Section /o "Download and install Math / equation detection module" SecLang_equ
     !insertmacro Download_Lang_Data tesseract-ocr-3.02.equ.tar.gz
     SectionEnd
+
+    ; https://github.com/tesseract-ocr/tesseract/blob/master/doc/tesseract.1.asc#languages
+    ; afr (Afrikaans) amh (Amharic) ara (Arabic) asm (Assamese) aze (Azerbaijani) aze_cyrl (Azerbaijani - Cyrilic) bel (Belarusian) ben (Bengali) bod (Tibetan) bos (Bosnian) bul (Bulgarian) cat (Catalan; Valencian) ceb (Cebuano) ces (Czech) chi_sim (Chinese - Simplified) chi_tra (Chinese - Traditional) chr (Cherokee) cym (Welsh) dan (Danish) dan_frak (Danish - Fraktur) deu (German) deu_frak (German - Fraktur) dzo (Dzongkha) ell (Greek, Modern (1453-)) eng (English) enm (English, Middle (1100-1500)) epo (Esperanto) equ (Math / equation detection module) est (Estonian) eus (Basque) fas (Persian) fin (Finnish) fra (French) frk (Frankish) frm (French, Middle (ca.1400-1600)) gle (Irish) glg (Galician) grc (Greek, Ancient (to 1453)) guj (Gujarati) hat (Haitian; Haitian Creole) heb (Hebrew) hin (Hindi) hrv (Croatian) hun (Hungarian) iku (Inuktitut) ind (Indonesian) isl (Icelandic) ita (Italian) ita_old (Italian - Old) jav (Javanese) jpn (Japanese) kan (Kannada) kat (Georgian) kat_old (Georgian - Old) kaz (Kazakh) khm (Central Khmer) kir (Kirghiz; Kyrgyz) kor (Korean) kur (Kurdish) lao (Lao) lat (Latin) lav (Latvian) lit (Lithuanian) mal (Malayalam) mar (Marathi) mkd (Macedonian) mlt (Maltese) msa (Malay) mya (Burmese) nep (Nepali) nld (Dutch; Flemish) nor (Norwegian) ori (Oriya) osd (Orientation and script detection module) pan (Panjabi; Punjabi) pol (Polish) por (Portuguese) pus (Pushto; Pashto) ron (Romanian; Moldavian; Moldovan) rus (Russian) san (Sanskrit) sin (Sinhala; Sinhalese) slk (Slovak) slk_frak (Slovak - Fraktur) slv (Slovenian) spa (Spanish; Castilian) spa_old (Spanish; Castilian - Old) sqi (Albanian) srp (Serbian) srp_latn (Serbian - Latin) swa (Swahili) swe (Swedish) syr (Syriac) tam (Tamil) tel (Telugu) tgk (Tajik) tgl (Tagalog) tha (Thai) tir (Tigrinya) tur (Turkish) uig (Uighur; Uyghur) ukr (Ukrainian) urd (Urdu) uzb (Uzbek) uzb_cyrl (Uzbek - Cyrilic) vie (Vietnamese) yid (Yiddish)
 
     Section /o "Download and install Afrikaans language data" SecLang_afr
     !insertmacro Download_Lang_Data tesseract-ocr-3.02.afr.tar.gz
