@@ -21,6 +21,9 @@ SetCompressor /FINAL /SOLID lzma
 SetCompressorDictSize 32
 
 ; Settings which normally should be passed as command line arguments.
+;define CROSSBUILD
+;define SHARED
+;define W64
 !ifndef SRCDIR
 !define SRCDIR .
 !endif
@@ -142,7 +145,11 @@ SpaceTexts
 CRCCheck on
 InstProgressFlags smooth colored
 CRCCheck On  # Do a CRC check before installing
+!ifdef W64
+InstallDir "$PROGRAMFILES64\Tesseract-OCR"
+!else
 InstallDir "$PROGRAMFILES\Tesseract-OCR"
+!endif
 # Name of program and file
 !ifdef VERSION
 OutFile tesseract-ocr-setup-${VERSION}.exe
