@@ -1052,6 +1052,14 @@ SectionGroupEnd
   ;LangString DESC_SecHelp ${LANG_ENGLISH} "Help information."
   LangString DESC_SecCS    ${LANG_ENGLISH} "Add shortcuts to Start menu."
 
+  LangString DESC_SEC0001 ${LANG_FRENCH} "Fichier d'installation."
+  ;LangString DESC_SecHelp ${LANG_FRENCH} "Aide."
+  LangString DESC_SecCS   ${LANG_FRENCH} "Ajouter des raccourcis vers le menu démarrer."
+
+  LangString DESC_SEC0001 ${LANG_GERMAN} "Dateien für die Installation."
+ ;LangString DESC_SecHelp ${LANG_GERMAN} "Hilfe."
+  LangString DESC_SecCS   ${LANG_GERMAN} "Einträge im Startmenü hinzufügen."
+
   LangString DESC_SEC0001 ${LANG_ITALIAN} "File di installazione."
   ;LangString DESC_SecHelp ${LANG_ITALIAN} "Guida di informazioni."
   LangString DESC_SecCS    ${LANG_ITALIAN} "Aggiungere collegamenti al menu Start."
