@@ -12,6 +12,11 @@
 ; See the License for the specific language governing permissions and
 ; limitations under the License.
 
+; TODO:
+; * Fix PreventMultipleInstances.
+; * Add Tesseract icon and images for installer.
+; * Add support for 64 bit Tesseract.
+
 SetCompressor /FINAL /SOLID lzma
 SetCompressorDictSize 32
 
@@ -78,8 +83,9 @@ BrandingText /TRIMCENTER "(c) 2010-2015 ${PRODUCT_NAME}"
 !define MUI_FINISHPAGE_LINK "View Tesseract on GitHub"
 !define MUI_FINISHPAGE_LINK_LOCATION "https://github.com/tesseract-ocr/tesseract"
 !define MUI_FINISHPAGE_NOAUTOCLOSE
-!define MUI_FINISHPAGE_SHOWREADME "notepad $INSTDIR\doc\README"
+!define MUI_FINISHPAGE_SHOWREADME "iexplore $INSTDIR\doc\README"
 !define MUI_FINISHPAGE_SHOWREADME_FUNCTION ShowReadme
+!define MUI_FINISHPAGE_SHOWREADME_TEXT "Show README"
 !define MUI_LICENSEPAGE_CHECKBOX
 !define MUI_STARTMENUPAGE_REGISTRY_ROOT HKLM
 !define MUI_STARTMENUPAGE_REGISTRY_KEY ${REGKEY}
@@ -110,8 +116,8 @@ Var OLD_KEY
 !ifdef VERSION
   Page custom PageReinstall PageLeaveReinstall
 !endif
-!insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_COMPONENTS
+!insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_STARTMENU Application $StartMenuGroup
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH
@@ -120,6 +126,8 @@ Var OLD_KEY
 
 # Languages
 !insertmacro MUI_LANGUAGE "English"
+!insertmacro MUI_LANGUAGE "French"
+!insertmacro MUI_LANGUAGE "German"
 !insertmacro MUI_LANGUAGE "Italian"
 !insertmacro MUI_LANGUAGE "Russian"
 !insertmacro MUI_LANGUAGE "Slovak"
@@ -1109,6 +1117,7 @@ FunctionEnd
 
 Function .onInit
   Call PreventMultipleInstances
+  !insertmacro MUI_LANGDLL_DISPLAY
   ;RequestExecutionLevel admin
   !insertmacro MULTIUSER_INIT
 
@@ -1141,13 +1150,6 @@ Function .onInit
         Goto SkipUnInstall
       messagebox mb_ok "Uninstaller failed:\n$0\n\nYou need to remove program manually."
   SkipUnInstall:
-  MessageBox MB_YESNO|MB_ICONQUESTION \
-    "Do you want to install ${PRODUCT_NAME} ${VERSION}?" \
-    /SD IDYES IDNO no IDYES yes
-  no:
-    SetSilent silent
-    Goto done
-  yes:
     ;InitPluginsDir
     ;File /oname=$PLUGINSDIR\splash.bmp "${NSISDIR}\Contrib\Graphics\Header\nsis.bmp"
     ;File /oname=$PLUGINSDIR\splash.bmp "new.bmp"
@@ -1338,9 +1340,10 @@ Function .onInit
 FunctionEnd
 
 Function un.onInit
-   !insertmacro MULTIUSER_UNINIT
-   ;!insertmacro SELECT_UNSECTION Main ${UNSEC0000}
-   ;!insertmacro MUI_UNGETLANGUAGE
+  !insertmacro MUI_LANGDLL_DISPLAY
+  !insertmacro MULTIUSER_UNINIT
+  ;!insertmacro SELECT_UNSECTION Main ${UNSEC0000}
+  ;!insertmacro MUI_UNGETLANGUAGE
 FunctionEnd
 
 Function .onInstFailed
@@ -1348,12 +1351,13 @@ Function .onInstFailed
 FunctionEnd
 
 Function ShowReadme
-  Exec "explorer.exe $INSTDIR\doc\README"
+  Exec "iexplore.exe $INSTDIR\doc\README"
   ;BringToFront
 FunctionEnd
 
 ; Prevent running multiple instances of the installer
 Function PreventMultipleInstances
+  ; TODO: Does not work.
   Push $R0
   System::Call 'kernel32::CreateMutexA(i 0, i 0, t ${PRODUCT_NAME}) ?e'
   Pop $R0
