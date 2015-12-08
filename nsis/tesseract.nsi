@@ -135,7 +135,7 @@ Var OLD_KEY
 !insertmacro MUI_LANGUAGE "SpanishInternational"
 
 # Installer attributes
-ShowInstDetails show
+;ShowInstDetails show
 InstProgressFlags smooth colored
 XPStyle on
 SpaceTexts
