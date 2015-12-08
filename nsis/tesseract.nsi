@@ -1,5 +1,6 @@
 ; (C) Copyright 2010, Sergey Bronnikov
 ; (C) Copyright 2010-2012, Zdenko Podobný
+; (C) Copyright 2015 Stefan Weil
 ;
 ; Licensed under the Apache License, Version 2.0 (the "License");
 ; you may not use this file except in compliance with the License.
@@ -26,9 +27,11 @@ SetCompressorDictSize 32
 !define PRODUCT_VERSION "${VERSION}"
 !define PRODUCT_PUBLISHER "Tesseract-OCR community"
 !define PRODUCT_WEB_SITE "https://github.com/tesseract-ocr/tesseract"
-; FIXME
+!ifdef OLD
 !define FILE_URL "http://tesseract-ocr.googlecode.com/files/"
-!define GITHUB_RAW_FILE_URL "https://raw.githubusercontent.com/tesseract-ocr/tessdata/master"
+!endif
+!define GITHUB_RAW_FILE_URL \
+  "https://raw.githubusercontent.com/tesseract-ocr/tessdata/master"
 
 !ifdef CROSSBUILD
 !addincludedir ${SRCDIR}\nsis\include
@@ -45,10 +48,10 @@ SetCompressorDictSize 32
 !endif
 
 # General Definitions
-Name "${PRODUCT_NAME} ${VERSION} for Windows"
-Caption "Tesseract-OCR ${VERSION}"
+Name "${PRODUCT_NAME}"
+Caption "${PRODUCT_NAME} ${VERSION}"
 !ifndef CROSSBUILD
-BrandingText /TRIMCENTER "(c) 2010-2012 Tesseract-OCR "
+BrandingText /TRIMCENTER "(c) 2010-2015 ${PRODUCT_NAME}"
 !endif
 
 !define REGKEY "SOFTWARE\${PRODUCT_NAME}"
@@ -72,7 +75,7 @@ BrandingText /TRIMCENTER "(c) 2010-2012 Tesseract-OCR "
 !define MUI_HEADERIMAGE
 !define MUI_HEADERIMAGE_BITMAP_NOSTRETCH
 !define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\modern-install-blue-full.ico"
-!define MUI_FINISHPAGE_LINK "Tesseract on GitHub"
+!define MUI_FINISHPAGE_LINK "View Tesseract on GitHub"
 !define MUI_FINISHPAGE_LINK_LOCATION "https://github.com/tesseract-ocr/tesseract"
 !define MUI_FINISHPAGE_NOAUTOCLOSE
 !define MUI_FINISHPAGE_SHOWREADME "notepad $INSTDIR\doc\README"
@@ -180,19 +183,20 @@ OutFile tesseract-ocr-setup.exe
 
 !macro Download_Lang_Data Lang
   ; Download traineddata file.
-  DetailPrint "Download: ${Lang} language files"
-  inetc::get /caption "Downloading ${Lang} language files" /popup "" \
+  DetailPrint "Download: ${Lang} language file"
+  inetc::get /caption "Downloading ${Lang} language file" \
       "${GITHUB_RAW_FILE_URL}/${Lang}.traineddata" $INSTDIR/tessdata/${Lang}.traineddata \
       /END
     Pop $0 # return value = exit code, "OK" if OK
     StrCmp $0 "OK" +2
-    MessageBox MB_OK|MB_ICONEXCLAMATION "http download error. Download Status of ${Lang}: $0. Click OK to continue." /SD IDOK
+    MessageBox MB_OK|MB_ICONEXCLAMATION \
+      "Download error. Status of ${Lang}: $0. Click OK to continue." /SD IDOK
 !macroend
 
 !macro Download_Lang_Data_with_Cube Lang
   ; Download traineddata file.
   DetailPrint "Download: ${Lang} language files"
-  inetc::get /CAPTION "Downloading ${Lang} language files" /POPUP "" \
+  inetc::get /CAPTION "Downloading ${Lang} language files" \
       "${GITHUB_RAW_FILE_URL}/${Lang}.cube.fold" $INSTDIR/tessdata/${Lang}.cube.fold \
       "${GITHUB_RAW_FILE_URL}/${Lang}.cube.lm" $INSTDIR/tessdata/${Lang}.cube.lm \
       "${GITHUB_RAW_FILE_URL}/${Lang}.cube.nn" $INSTDIR/tessdata/${Lang}.cube.nn \
@@ -203,20 +207,52 @@ OutFile tesseract-ocr-setup.exe
       /END
     Pop $0 # return value = exit code, "OK" if OK
     StrCmp $0 "OK" +2
-    MessageBox MB_OK|MB_ICONEXCLAMATION "http download error. Download Status of ${Lang}: $0. Click OK to continue." /SD IDOK
+    MessageBox MB_OK|MB_ICONEXCLAMATION \
+      "Download error. Status of ${Lang}: $0. Click OK to continue." /SD IDOK
+!macroend
+
+!macro Download_Lang_Data_with_Cube_bigrams Lang
+  ; Download traineddata file.
+  DetailPrint "Download: ${Lang} language files"
+  inetc::get /CAPTION "Downloading ${Lang} language files" \
+      "${GITHUB_RAW_FILE_URL}/${Lang}.cube.bigrams" $INSTDIR/tessdata/${Lang}.cube.bigrams \
+      "${GITHUB_RAW_FILE_URL}/${Lang}.cube.fold" $INSTDIR/tessdata/${Lang}.cube.fold \
+      "${GITHUB_RAW_FILE_URL}/${Lang}.cube.lm" $INSTDIR/tessdata/${Lang}.cube.lm \
+      "${GITHUB_RAW_FILE_URL}/${Lang}.cube.nn" $INSTDIR/tessdata/${Lang}.cube.nn \
+      "${GITHUB_RAW_FILE_URL}/${Lang}.cube.params" $INSTDIR/tessdata/${Lang}.cube.params \
+      "${GITHUB_RAW_FILE_URL}/${Lang}.cube.size" $INSTDIR/tessdata/${Lang}.cube.size \
+      "${GITHUB_RAW_FILE_URL}/${Lang}.cube.word-freq" $INSTDIR/tessdata/${Lang}.cube.word-freq \
+      "${GITHUB_RAW_FILE_URL}/${Lang}.traineddata" $INSTDIR/tessdata/${Lang}.traineddata \
+      /END
+    Pop $0 # return value = exit code, "OK" if OK
+    StrCmp $0 "OK" +2
+    MessageBox MB_OK|MB_ICONEXCLAMATION \
+      "Download error. Status of ${Lang}: $0. Click OK to continue." /SD IDOK
+!macroend
+
+!macro Download_Lang_Data_File Lang_File
+  ; Download single file.
+  DetailPrint "Download: ${Lang_File} language file"
+  inetc::get /caption "Downloading ${Lang_File} language file" \
+      "${GITHUB_RAW_FILE_URL}/${Lang_File}" $INSTDIR/tessdata/${Lang_File} \
+      /END
+    Pop $0 # return value = exit code, "OK" if OK
+    StrCmp $0 "OK" +2
+    MessageBox MB_OK|MB_ICONEXCLAMATION \
+      "Download error. Status of ${Lang_File}: $0. Click OK to continue." /SD IDOK
 !macroend
 
 !macro Download_Leptonica DataUrl
   IfFileExists $TEMP/leptonica.zip dlok
-  inetc::get /caption "Downloading $1" /popup "" ${DataUrl} $TEMP/leptonica.zip /END
+  inetc::get /caption "Downloading $1" /popup "" \
+      ${DataUrl} $TEMP/leptonica.zip /END
     Pop $R0 # return value = exit code, "OK" if OK
     StrCmp $R0 "OK" dlok
-    MessageBox MB_OK|MB_ICONEXCLAMATION "http download error. Download Status of $1: $R0. Click OK to continue." /SD IDOK
+    MessageBox MB_OK|MB_ICONEXCLAMATION \
+      "Download error. Status of $1: $R0. Click OK to continue." /SD IDOK
     Goto error
   dlok:
-!ifndef CROSSBUILD
     nsisunz::UnzipToLog "$TEMP/leptonica.zip" "$INSTDIR"
-!endif
     Pop $R0
     StrCmp $R0 "success" +2
         MessageBox MB_OK "Decompression of leptonica failed: $R0"
@@ -225,26 +261,25 @@ OutFile tesseract-ocr-setup.exe
     Delete "$TEMP\leptonica.zip"
 !macroend
 
+!ifdef OLD
 !macro Download_Data2 Filename Komp
   IfFileExists $TEMP/${Filename} dlok
-    inetc::get /caption "Downloading $1" /popup "" "${FILE_URL}/${Filename}" $TEMP/${Filename} /END
+    inetc::get /caption "Downloading $1" /popup "" \
+      "${FILE_URL}/${Filename}" $TEMP/${Filename} /END
     Pop $R0 # return value = exit code, "OK" if OK
     StrCmp $R0 "OK" dlok
-    MessageBox MB_OK|MB_ICONEXCLAMATION "http download error. Download Status of $1: $R0. Click OK to continue." /SD IDOK
+    MessageBox MB_OK|MB_ICONEXCLAMATION \
+      "Download error. Status of $1: $R0. Click OK to continue." /SD IDOK
     Goto error
   dlok:
     ${If} ${Komp} == "tgz"
         DetailPrint "Extracting ${Filename}"
-!ifndef CROSSBUILD
         untgz::extract "-d" "$INSTDIR\.." "$TEMP\${Filename}"
-!endif
         Goto install
     ${EndIf}
     ${If} ${Komp} == "zip"
         DetailPrint "Extracting ${Filename}"
-!ifndef CROSSBUILD
         nsisunz::UnzipToLog "$TEMP\${Filename}" "$INSTDIR\"
-!endif
         Goto install
     ${EndIf}
      MessageBox MB_OK|MB_ICONEXCLAMATION "Unsupported compression!"
@@ -259,22 +294,20 @@ OutFile tesseract-ocr-setup.exe
 
 !macro Download_Data Filename Komp
   IfFileExists $TEMP/${Filename} dlok
-  inetc::get /caption "Downloading $1" /popup "" "${FILE_URL}/${Filename}" $TEMP/${Filename} /END
+  inetc::get /caption "Downloading $1" /popup "" \
+      "${FILE_URL}/${Filename}" $TEMP/${Filename} /END
     Pop $R0 # return value = exit code, "OK" if OK
     StrCmp $R0 "OK" dlok
-    MessageBox MB_OK|MB_ICONEXCLAMATION "http download error. Download Status of $1: $R0. Click OK to continue." /SD IDOK
+    MessageBox MB_OK|MB_ICONEXCLAMATION \
+      "Download error. Status of $1: $R0. Click OK to continue." /SD IDOK
     Goto end
   dlok:
     ${If} ${Komp} == "tgz"
-!ifndef CROSSBUILD
         untgz::extract "-d" "$INSTDIR" "$TEMP\${Filename}"
-!endif
         Goto install
     ${EndIf}
     ${If} ${Komp} == "zip"
-!ifndef CROSSBUILD
         nsisunz::UnzipToLog "$TEMP\${Filename}" "$INSTDIR"
-!endif
         Goto install
     ${EndIf}
      MessageBox MB_OK|MB_ICONEXCLAMATION "Unsupported compression!"
@@ -291,6 +324,7 @@ OutFile tesseract-ocr-setup.exe
     RMDir /r "$TEMP\Tesseract-OCR"
   end:
 !macroend
+!endif ; OLD
 
 Section -Main SEC0000
   ; mark as read only component
@@ -363,7 +397,7 @@ Section "Training Tools" SecTr
 SectionEnd
 
 Section -post SEC0001
-  ;Store installation folder - we use allways HKLM!
+  ;Store installation folder - we use always HKLM!
   WriteRegStr HKLM "${REGKEY}" "Path" "$INSTDIR"
   WriteRegStr HKLM "${REGKEY}" "Mode" $MultiUser.InstallMode
   WriteRegStr HKLM "${REGKEY}" "InstallDir" "$INSTDIR"
@@ -372,14 +406,14 @@ Section -post SEC0001
   ;WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Run" "Tesseract-OCR" "$INSTDIR\tesseract.exe"
   ; Register to Add/Remove program in control panel
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "DisplayName" "${PRODUCT_NAME} - open source OCR engine"
-  WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" DisplayVersion "${VERSION}"
-  WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" Publisher "${PRODUCT_PUBLISHER}"
-  WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" URLInfoAbout "${PRODUCT_WEB_SITE}"
+  WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "DisplayVersion" "${VERSION}"
+  WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "Publisher" "${PRODUCT_PUBLISHER}"
+  WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "URLInfoAbout" "${PRODUCT_WEB_SITE}"
   WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "DisplayIcon" "$INSTDIR\uninstall.exe"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "UninstallString" "$INSTDIR\uninstall.exe"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "QuietUninstallString" '"$INSTDIR\uninstall.exe" /S'
-  WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" NoModify 1
-  WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" NoRepair 1
+  WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "NoModify" 1
+  WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "NoRepair" 1
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
   ;ExecShell "open" "https://github.com/tesseract-ocr/tesseract"
@@ -408,6 +442,7 @@ SectionGroup "Registry settings" SecRS
     SectionEnd
 SectionGroupEnd
 
+!ifdef OLD
 SectionGroup "Tesseract development files" SecGrp_dev
     Section /o "tesseract libraries including header files" SecLang_tlib
     !insertmacro Download_Data2 tesseract-ocr-${VERSION}-win32-lib-include-dirs.zip zip
@@ -433,6 +468,7 @@ SectionGroup "Tesseract development files" SecGrp_dev
     CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\DoxygenDoc.lnk" "$INSTDIR\tesseract-ocr\doc\html\index.html"
     SectionEnd
 SectionGroupEnd
+!endif ; OLD
 
 ; Language files
 SectionGroup "Language data" SecGrp_LD
@@ -471,8 +507,7 @@ SectionGroup "Additional language data (download)" SecGrp_ALD
   SectionEnd
 
   Section /o "Arabic" SecLang_ara
-    !insertmacro Download_Lang_Data ara.cube.bigrams
-    !insertmacro Download_Lang_Data_with_Cube ara
+    !insertmacro Download_Lang_Data_with_Cube_bigrams ara
   SectionEnd
 
   Section /o "Assamese" SecLang_asm
@@ -600,9 +635,8 @@ SectionGroup "Additional language data (download)" SecGrp_ALD
   SectionEnd
 
   Section /o "French" SecLang_fra
-    !insertmacro Download_Lang_Data fra.cube.bigrams
-    !insertmacro Download_Lang_Data fra.tesseract_cube.nn
-    !insertmacro Download_Lang_Data_with_Cube fra
+    !insertmacro Download_Lang_Data_File fra.tesseract_cube.nn
+    !insertmacro Download_Lang_Data_with_Cube_bigrams fra
   SectionEnd
 
   Section /o "French - Middle (ca. 1400-1600)" SecLang_frm
@@ -630,13 +664,13 @@ SectionGroup "Additional language data (download)" SecGrp_ALD
   SectionEnd
 
   Section /o "Hindi" SecLang_hin
-    !insertmacro Download_Lang_Data hin.cube.bigrams
-    !insertmacro Download_Lang_Data hin.cube.fold
-    !insertmacro Download_Lang_Data hin.cube.lm
-    !insertmacro Download_Lang_Data hin.cube.nn
-    !insertmacro Download_Lang_Data hin.cube.params
-    !insertmacro Download_Lang_Data hin.cube.word-freq
-    !insertmacro Download_Lang_Data hin.tesseract_cube.nn
+    !insertmacro Download_Lang_Data_File hin.cube.bigrams
+    !insertmacro Download_Lang_Data_File hin.cube.fold
+    !insertmacro Download_Lang_Data_File hin.cube.lm
+    !insertmacro Download_Lang_Data_File hin.cube.nn
+    !insertmacro Download_Lang_Data_File hin.cube.params
+    !insertmacro Download_Lang_Data_File hin.cube.word-freq
+    !insertmacro Download_Lang_Data_File hin.tesseract_cube.nn
     !insertmacro Download_Lang_Data hin
   SectionEnd
 
@@ -657,9 +691,8 @@ SectionGroup "Additional language data (download)" SecGrp_ALD
   SectionEnd
 
   Section /o "Italian" SecLang_ita
-    !insertmacro Download_Lang_Data ita.cube.bigrams
-    !insertmacro Download_Lang_Data ita.tesseract_cube.nn
-    !insertmacro Download_Lang_Data_with_Cube ita
+    !insertmacro Download_Lang_Data_File ita.tesseract_cube.nn
+    !insertmacro Download_Lang_Data_with_Cube_bigrams ita
   SectionEnd
 
   Section /o "Italian (Old)" SecLang_ita_old
@@ -803,8 +836,7 @@ SectionGroup "Additional language data (download)" SecGrp_ALD
   SectionEnd
 
   Section /o "Spanish" SecLang_spa
-    !insertmacro Download_Lang_Data spa.cube.bigrams
-    !insertmacro Download_Lang_Data_with_Cube spa
+    !insertmacro Download_Lang_Data_with_Cube_bigrams spa
   SectionEnd
 
   Section /o "Spanish (Old)" SecLang_spa_old
@@ -827,9 +859,11 @@ SectionGroup "Additional language data (download)" SecGrp_ALD
     !insertmacro Download_Lang_Data swe
   SectionEnd
 
+!ifdef OLD
   Section /o "Swedish (Fraktur)" SecLang_swe_frak
     !insertmacro Download_Lang_Data swe-frak
   SectionEnd
+!endif ; OLD
 
   Section /o "Syriac" SecLang_syr
     !insertmacro Download_Lang_Data syr
@@ -981,7 +1015,8 @@ Function .onInit
     StrCpy $OLD_KEY "$R0"
     StrCmp $R0 "" SkipUnInstall
   test2:
-    MessageBox MB_YESNO|MB_ICONEXCLAMATION "Tesseract-ocr version $R0 is installed (in $OLD_KEY)! Do you want to uninstall it first?$\nUninstall will delete all files in '$INSTDIR'!" \
+    MessageBox MB_YESNO|MB_ICONEXCLAMATION \
+      "Tesseract-ocr version $R0 is installed (in $OLD_KEY)! Do you want to uninstall it first?$\nUninstall will delete all files in '$INSTDIR'!" \
        /SD IDYES IDNO SkipUnInstall IDYES UnInstall
   UnInstall:
     StrCmp $OLD_KEY "HKLM" UnInst_hklm
@@ -1000,7 +1035,8 @@ Function .onInit
         Goto SkipUnInstall
       messagebox mb_ok "Uninstaller failed:\n$0\n\nYou need to remove program manually."
   SkipUnInstall:
-  MessageBox MB_YESNO|MB_ICONQUESTION "Do you want to install ${PRODUCT_NAME} ${VERSION}?" \
+  MessageBox MB_YESNO|MB_ICONQUESTION \
+    "Do you want to install ${PRODUCT_NAME} ${VERSION}?" \
     /SD IDYES IDNO no IDYES yes
   no:
     SetSilent silent
@@ -1011,7 +1047,7 @@ Function .onInit
     ;File /oname=$PLUGINSDIR\splash.bmp "new.bmp"
     ;advsplash::show 1000 600 400 -1 $PLUGINSDIR\splash
     ;Pop $0          ; $0 has '1' if the user closed the splash screen early,
-                    ; '0' if everything closed normal, and '-1' if some error occured.
+                    ; '0' if everything closed normal, and '-1' if some error occurred.
     ;IfFileExists $INSTDIR\loadmain.exe PathGood
   done:
     ; Make selection based on System language ID
@@ -1176,7 +1212,9 @@ Function .onInit
     Swahili: !insertmacro SelectSection ${SecLang_swa}
             Goto lang_end
     Swedish: !insertmacro SelectSection ${SecLang_swe}
+!ifdef OLD
             !insertmacro SelectSection ${SecLang_swe_frak}
+!endif
             Goto lang_end
     Tamil: !insertmacro SelectSection ${SecLang_tam}
             Goto lang_end
