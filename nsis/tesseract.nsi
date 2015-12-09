@@ -138,7 +138,7 @@ Var OLD_KEY
 !insertmacro MUI_LANGUAGE "SpanishInternational"
 
 # Installer attributes
-;ShowInstDetails show
+ShowInstDetails hide
 InstProgressFlags smooth colored
 XPStyle on
 SpaceTexts
@@ -411,26 +411,29 @@ Section "Training Tools" SecTr
   File ${TRAININGDIR}\shapeclustering.exe
 SectionEnd
 
+!define UNINST_EXE "$INSTDIR\tesseract-uninstall.exe"
+!define UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
+
 Section -post SEC0001
-  ;Store installation folder - we use always HKLM!
+  ;Store installation folder - we always use HKLM!
   WriteRegStr HKLM "${REGKEY}" "Path" "$INSTDIR"
   WriteRegStr HKLM "${REGKEY}" "Mode" $MultiUser.InstallMode
   WriteRegStr HKLM "${REGKEY}" "InstallDir" "$INSTDIR"
   WriteRegStr HKLM "${REGKEY}" "CurrentVersion" "${VERSION}"
-  WriteRegStr HKLM "${REGKEY}" "Uninstaller" "$INSTDIR\uninstall.exe"
+  WriteRegStr HKLM "${REGKEY}" "Uninstaller" "${UNINST_EXE}"
   ;WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Run" "Tesseract-OCR" "$INSTDIR\tesseract.exe"
   ; Register to Add/Remove program in control panel
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "DisplayName" "${PRODUCT_NAME} - open source OCR engine"
-  WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "DisplayVersion" "${VERSION}"
-  WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "Publisher" "${PRODUCT_PUBLISHER}"
-  WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "URLInfoAbout" "${PRODUCT_WEB_SITE}"
-  WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "DisplayIcon" "$INSTDIR\uninstall.exe"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "UninstallString" "$INSTDIR\uninstall.exe"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "QuietUninstallString" '"$INSTDIR\uninstall.exe" /S'
-  WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "NoModify" 1
-  WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "NoRepair" 1
+  WriteRegStr HKLM "${UNINST_KEY}" "DisplayName" "${PRODUCT_NAME} - open source OCR engine"
+  WriteRegStr HKLM "${UNINST_KEY}" "DisplayVersion" "${VERSION}"
+  WriteRegStr HKLM "${UNINST_KEY}" "Publisher" "${PRODUCT_PUBLISHER}"
+  WriteRegStr HKLM "${UNINST_KEY}" "URLInfoAbout" "${PRODUCT_WEB_SITE}"
+  WriteRegStr HKLM "${UNINST_KEY}" "DisplayIcon" "${UNINST_EXE}"
+  WriteRegStr HKLM "${UNINST_KEY}" "UninstallString" "${UNINST_EXE}"
+  WriteRegStr HKLM "${UNINST_KEY}" "QuietUninstallString" '"${UNINST_EXE}" /S'
+  WriteRegDWORD HKLM "${UNINST_KEY}" "NoModify" 1
+  WriteRegDWORD HKLM "${UNINST_KEY}" "NoRepair" 1
   ;Create uninstaller
-  WriteUninstaller "$INSTDIR\Uninstall.exe"
+  WriteUninstaller "${UNINST_EXE}"
   ;ExecShell "open" "https://github.com/tesseract-ocr/tesseract"
   ;ExecShell "open" '"$INSTDIR"'
   ;BringToFront
@@ -443,7 +446,7 @@ Section "Shortcuts creation" SecCS
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Homepage.lnk" "${PRODUCT_WEB_SITE}"
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\ReadMe.lnk" "${PRODUCT_WEB_SITE}/wiki/ReadMe"
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\FAQ.lnk" "${PRODUCT_WEB_SITE}/wiki/FAQ"
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall.lnk" "${UNINST_EXE}" "" "${UNINST_EXE}" 0
   ;CreateShortCut "$DESKTOP\Tesseract-OCR.lnk" "$INSTDIR\tesseract.exe" "" "$INSTDIR\tesseract.exe" 0
   ;CreateShortCut "$QUICKLAUNCH\.lnk" "$INSTDIR\tesseract.exe" "" "$INSTDIR\tesseract.exe" 0
 SectionEnd
@@ -1106,8 +1109,8 @@ Section -un.Main UNSEC0000
   SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
 
   # remove the Add/Remove information
-  DeleteRegKey HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
-  Delete "$INSTDIR\Uninstall.exe"
+  DeleteRegKey HKLM "${UNINST_KEY}"
+  Delete "${UNINST_EXE}"
   DeleteRegValue HKLM "${REGKEY}" Path
   DeleteRegKey /IfEmpty HKLM "${REGKEY}\Components"
   DeleteRegKey /IfEmpty HKLM "${REGKEY}"
@@ -1139,23 +1142,23 @@ Function .onInit
   ; is tesseract already installed?
   ReadRegStr $R0 HKCU "${REGKEY}" "CurrentVersion"
   StrCpy $OLD_KEY HKCU
-  StrCmp $R0 "" test1 test2
-  test1:
+  StrCmp $R0 "" TestHKLM AskUninstall
+  TestHKLM:
     ReadRegStr $R0 HKLM "${REGKEY}" "CurrentVersion"
-    StrCpy $OLD_KEY "$R0"
+    StrCpy $OLD_KEY HKLM
     StrCmp $R0 "" SkipUnInstall
-  test2:
+  AskUninstall:
     MessageBox MB_YESNO|MB_ICONEXCLAMATION \
       "Tesseract-ocr version $R0 is installed (in $OLD_KEY)! Do you want to uninstall it first?$\nUninstall will delete all files in '$INSTDIR'!" \
        /SD IDYES IDNO SkipUnInstall IDYES UnInstall
   UnInstall:
     StrCmp $OLD_KEY "HKLM" UnInst_hklm
-       DetailPrint "CurrentUser:"
-       readRegStr $R1 HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "UninstallString"
+       DetailPrint "Uninstall: current user"
+       readRegStr $R1 HKCU "${UNINST_KEY}" "UninstallString"
        Goto try_uninstall
     UnInst_hklm:
-       DetailPrint "UnInst_hklm"
-       readRegStr $R1 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "UninstallString"
+       DetailPrint "UnInstall: all users"
+       readRegStr $R1 HKLM "${UNINST_KEY}" "UninstallString"
     try_uninstall:
       ClearErrors
       ExecWait '$R1 _?=$INSTDIR'$0
@@ -1172,7 +1175,7 @@ Function .onInit
     ;Pop $0          ; $0 has '1' if the user closed the splash screen early,
                     ; '0' if everything closed normal, and '-1' if some error occurred.
     ;IfFileExists $INSTDIR\loadmain.exe PathGood
-  done:
+  ;done:
     ; Make selection based on System language ID
     System::Call 'kernel32::GetSystemDefaultLangID() i .r0'
     ;http://msdn.microsoft.com/en-us/library/dd318693%28v=VS.85%29.aspx
