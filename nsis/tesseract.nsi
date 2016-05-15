@@ -44,16 +44,10 @@ SetCompressorDictSize 32
 !ifdef CROSSBUILD
 !addincludedir ${SRCDIR}\nsis\include
 !addplugindir ${SRCDIR}\nsis\plugins
-!ifdef SHARED
-!define APIDIR "../api/.libs"
-!else
-!define APIDIR "../api"
 !endif
-!define TRAININGDIR "../training"
-!else
-!define APIDIR "LIB_Release"
-!define TRAININGDIR "LIB_Release"
-!endif
+
+!define PREFIX "../usr/i686-w64-mingw32"
+!define TRAININGDIR "${PREFIX}/bin"
 
 # General Definitions
 Name "${PRODUCT_NAME}"
@@ -346,10 +340,8 @@ Section -Main SEC0000
   SectionIn RO
   SetOutPath "$INSTDIR"
   # files included in distribution
-  File ${APIDIR}\tesseract.exe
-!ifdef SHARED
-  File ${APIDIR}\libtesseract-3.dll
-!endif
+  File ${PREFIX}/bin/tesseract.exe
+  File ${PREFIX}/bin/libtesseract-3.dll
 !ifdef CROSSBUILD
   File ${SRCDIR}\dll\i686-w64-mingw32\*.dll
 !endif
@@ -358,35 +350,14 @@ Section -Main SEC0000
   SetOutPath "$INSTDIR\java"
   File ..\java\ScrollView.jar
   CreateDirectory "$INSTDIR\tessdata"
+  SetOutPath "$INSTDIR\tessdata"
+  File ${PREFIX}/share/tessdata/pdf.ttf
   CreateDirectory "$INSTDIR\tessdata\configs"
   SetOutPath "$INSTDIR\tessdata\configs"
-  File ${SRCDIR}\tessdata\configs\ambigs.train
-  File ${SRCDIR}\tessdata\configs\api_config
-  File ${SRCDIR}\tessdata\configs\bazaar
-  File ${SRCDIR}\tessdata\configs\bigram
-  File ${SRCDIR}\tessdata\configs\box.train
-  File ${SRCDIR}\tessdata\configs\box.train.stderr
-  File ${SRCDIR}\tessdata\configs\digits
-  File ${SRCDIR}\tessdata\configs\get.image
-  File ${SRCDIR}\tessdata\configs\hocr
-  File ${SRCDIR}\tessdata\configs\inter
-  File ${SRCDIR}\tessdata\configs\kannada
-  File ${SRCDIR}\tessdata\configs\linebox
-  File ${SRCDIR}\tessdata\configs\logfile
-  File ${SRCDIR}\tessdata\configs\makebox
-  File ${SRCDIR}\tessdata\configs\pdf
-  File ${SRCDIR}\tessdata\configs\quiet
-  File ${SRCDIR}\tessdata\configs\rebox
-  File ${SRCDIR}\tessdata\configs\strokewidth
-  File ${SRCDIR}\tessdata\configs\unlv
+  File ${PREFIX}/share/tessdata/configs/*
   CreateDirectory "$INSTDIR\tessdata\tessconfigs"
   SetOutPath "$INSTDIR\tessdata\tessconfigs"
-  File ${SRCDIR}\tessdata\tessconfigs\batch
-  File ${SRCDIR}\tessdata\tessconfigs\batch.nochop
-  File ${SRCDIR}\tessdata\tessconfigs\matdemo
-  File ${SRCDIR}\tessdata\tessconfigs\msdemo
-  File ${SRCDIR}\tessdata\tessconfigs\nobatch
-  File ${SRCDIR}\tessdata\tessconfigs\segdemo
+  File ${PREFIX}/share/tessdata/tessconfigs/*
   CreateDirectory "$INSTDIR\doc"
   SetOutPath "$INSTDIR\doc"
   File ${SRCDIR}\AUTHORS
@@ -394,7 +365,7 @@ Section -Main SEC0000
   File ${SRCDIR}\testing\eurotext.tif
   File ${SRCDIR}\testing\phototest.tif
   File ${SRCDIR}\testing\README
-  File ${SRCDIR}\ReleaseNotes
+##  File ${SRCDIR}\ReleaseNotes
 SectionEnd
 
 Section "Training Tools" SecTr
@@ -408,7 +379,9 @@ Section "Training Tools" SecTr
   File ${TRAININGDIR}\mftraining.exe
   File ${TRAININGDIR}\unicharset_extractor.exe
   File ${TRAININGDIR}\wordlist2dawg.exe
+  File ${TRAININGDIR}\set_unicharset_properties.exe
   File ${TRAININGDIR}\shapeclustering.exe
+  File ${TRAININGDIR}\text2image.exe
 SectionEnd
 
 !define UNINST_EXE "$INSTDIR\tesseract-uninstall.exe"
