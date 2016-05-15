@@ -72,7 +72,7 @@ doc-clean:
 	rm -rf $(top_srcdir)/doc/html/*
 
 if MINGW
-winsetup:
+winsetup: training ScrollView.jar
 	@cd "$(top_builddir)/nsis" && $(MAKE) winsetup
 endif
 
