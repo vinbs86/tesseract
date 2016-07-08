@@ -33,6 +33,46 @@
 #include "openclwrapper.h"
 #include "osdetect.h"
 
+#if defined(_WIN32)
+
+#include <tiffio.h>
+#include <windows.h>
+
+static int isGuiApp(void)
+{
+    return GetStdHandle(STD_OUTPUT_HANDLE) == NULL;
+}
+
+static void
+Win32WarningHandler(const char* module, const char* fmt, va_list ap)
+{
+    if (isGuiApp()) {
+        LPTSTR szTitle;
+        LPTSTR szTmp;
+        LPCTSTR szTitleText = "%s Warning";
+        LPCTSTR szDefaultModule = "LIBTIFF";
+        LPCTSTR szTmpModule = (module == NULL) ? szDefaultModule : module;
+        SIZE_T nBufSize = (strlen(szTmpModule) +
+                        strlen(szTitleText) + strlen(fmt) + 256)*sizeof(char);
+
+        if ((szTitle = (LPTSTR)LocalAlloc(LMEM_FIXED, nBufSize)) == NULL)
+                return;
+        sprintf(szTitle, szTitleText, szTmpModule);
+        szTmp = szTitle + (strlen(szTitle)+2)*sizeof(char);
+        vsnprintf(szTmp, nBufSize-(strlen(szTitle)+2)*sizeof(char), fmt, ap);
+        MessageBoxA(GetFocus(), szTmp, szTitle, MB_OK | MB_ICONINFORMATION);
+        LocalFree(szTitle);
+    } else {
+        if (module != NULL)
+                fprintf(stderr, "%s: ", module);
+        fprintf(stderr, "Warning, ");
+        vfprintf(stderr, fmt, ap);
+        fprintf(stderr, ".\n");
+    }
+}
+
+#endif
+
 void PrintVersionInfo() {
     char *versionStrP;
 
@@ -351,6 +391,11 @@ int main(int argc, char **argv) {
   GenericVector<STRING> vars_vec, vars_values;
   int arg_i = 1;
   tesseract::PageSegMode pagesegmode = tesseract::PSM_AUTO;
+
+#if defined(_WIN32)
+  /* Show libtiff warnings on console (not in GUI). */
+  TIFFSetWarningHandler(Win32WarningHandler);
+#endif
 
   ParseArgs(argc, argv,
           &lang, &image, &outputbase, &datapath,
