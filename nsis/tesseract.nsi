@@ -165,18 +165,17 @@ OutFile tesseract-ocr-setup.exe
 
 !macro RemoveTessdataPrefix
   ReadRegStr $R2 ${env_hklm} 'TESSDATA_PREFIX'
-  ReadRegStr $R3 ${env_hkcu} 'TESSDATA_PREFIX'
   StrCmp $R2 "" Next1 0
     DetailPrint "Removing $R2 from HKLM Environment..."
-    DeleteRegValue ${env_hklm} TESSDATA_PREFIX  # This only empty variable, but do not remove it!
-    ${EnvVarUpdate} $0 "TESSDATA_PREFIX"  "R" "HKLM" $R1
+    DeleteRegValue ${env_hklm} "TESSDATA_PREFIX"
   Next1:
-    StrCmp $R3 "" Next2 0
-      DetailPrint "Removing $R3 from HKCU Environment..."
-      DeleteRegValue ${env_hkcu} "TESSDATA_PREFIX"
+  ReadRegStr $R2 ${env_hkcu} 'TESSDATA_PREFIX'
+  StrCmp $R2 "" Next2 0
+    DetailPrint "Removing $R2 from HKCU Environment..."
+    DeleteRegValue ${env_hkcu} "TESSDATA_PREFIX"
   Next2:
-    # make sure windows knows about the change
-    SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
+  # make sure windows knows about the change
+  SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
 !macroend
 
 !macro SetTESSDATA
@@ -1078,8 +1077,7 @@ Section -un.Main UNSEC0000
   SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
   ${un.EnvVarUpdate} $0 "PATH" "R" HKLM $INSTDIR
   SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
-  DeleteRegValue HKLM "Environment" "TESSDATA_PREFIX"
-  SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
+  !insertmacro RemoveTessdataPrefix
 
   # remove the Add/Remove information
   DeleteRegKey HKLM "${UNINST_KEY}"
