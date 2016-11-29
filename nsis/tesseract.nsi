@@ -28,7 +28,7 @@ SetCompressorDictSize 32
 !define SRCDIR .
 !endif
 !ifndef VERSION
-!define VERSION 3.05-dev
+!define VERSION 4.00-dev
 !endif
 
 !define PRODUCT_NAME "Tesseract-OCR"
@@ -291,7 +291,7 @@ Section -Main SEC0000
   SetOutPath "$INSTDIR"
   # files included in distribution
   File ${PREFIX}/bin/tesseract.exe
-  File ${PREFIX}/bin/libtesseract-3.dll
+  File ${PREFIX}/bin/libtesseract-*.dll
 !ifdef CROSSBUILD
   File ${SRCDIR}\dll\i686-w64-mingw32\*.dll
 !endif
