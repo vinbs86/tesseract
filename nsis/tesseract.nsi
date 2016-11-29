@@ -423,6 +423,7 @@ Section "Shortcuts creation" SecCS
   ;CreateShortCut "$QUICKLAUNCH\.lnk" "$INSTDIR\tesseract.exe" "" "$INSTDIR\tesseract.exe" 0
 SectionEnd
 
+!ifdef OLD ; disabled because of bad behaviour with long PATH
 SectionGroup "Registry settings" SecRS
     Section /o "Add to Path" SecRS_path
         !insertmacro AddToPath
@@ -431,6 +432,7 @@ SectionGroup "Registry settings" SecRS
         !insertmacro SetTESSDATA
     SectionEnd
 SectionGroupEnd
+!endif ; OLD
 
 !ifdef OLD
 SectionGroup "Tesseract development files" SecGrp_dev
