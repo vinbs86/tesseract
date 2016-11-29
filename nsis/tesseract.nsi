@@ -96,13 +96,17 @@ BrandingText /TRIMCENTER "(c) 2010-2015 ${PRODUCT_NAME}"
 !include MultiUser.nsh
 !include Sections.nsh
 !include MUI2.nsh
+!ifdef REGISTR_SETTINGS
 !include EnvVarUpdate.nsh
+!endif ; REGISTRY_SETTINGS
 !include LogicLib.nsh
 !include winmessages.nsh # include for some of the windows messages defines
 
 # Variables
 Var StartMenuGroup
+!ifdef REGISTR_SETTINGS
 Var PathKey
+!endif ; REGISTRY_SETTINGS
 ; Define user variables
 Var OLD_KEY
 
@@ -151,6 +155,7 @@ OutFile tesseract-ocr-setup-${VERSION}.exe
 OutFile tesseract-ocr-setup.exe
 !endif
 
+!ifdef REGISTR_SETTINGS
 !macro AddToPath
   # TODO(zdenop): Check if $INSTDIR is in path. If yes, do not append it.
   # append bin path to user PATH environment variable
@@ -188,6 +193,7 @@ OutFile tesseract-ocr-setup.exe
   # make sure windows knows about the change
   SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
 !macroend
+!endif ; REGISTRY_SETTINGS
 
 !macro Download_Lang_Data Lang
   ; Download traineddata file.
@@ -374,6 +380,7 @@ Section "Shortcuts creation" SecCS
   ;CreateShortCut "$QUICKLAUNCH\.lnk" "$INSTDIR\tesseract.exe" "" "$INSTDIR\tesseract.exe" 0
 SectionEnd
 
+!ifdef REGISTRY_SETTINGS ; disabled because of bad behaviour with long PATH
 SectionGroup "Registry settings" SecRS
     Section /o "Add to Path" SecRS_path
         !insertmacro AddToPath
@@ -382,6 +389,7 @@ SectionGroup "Registry settings" SecRS
         !insertmacro SetTESSDATA
     SectionEnd
 SectionGroupEnd
+!endif ; REGISTRY_SETTINGS
 
 !ifdef OLD
 SectionGroup "Tesseract development files" SecGrp_dev
@@ -1017,9 +1025,11 @@ Section -un.Main UNSEC0000
   DetailPrint "Removing registry info"
   DeleteRegKey HKLM "Software\Tesseract-OCR"
   SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
+!ifdef REGISTR_SETTINGS
   ${un.EnvVarUpdate} $0 "PATH" "R" HKLM $INSTDIR
   SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
   !insertmacro RemoveTessdataPrefix
+!endif ; REGISTRY_SETTINGS
 
   # remove the Add/Remove information
   DeleteRegKey HKLM "${UNINST_KEY}"
