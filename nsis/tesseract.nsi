@@ -327,17 +327,7 @@ SectionEnd
 Section "Training Tools" SecTr
   SectionIn 1
   SetOutPath "$INSTDIR"
-  File ${TRAININGDIR}\ambiguous_words.exe
-  File ${TRAININGDIR}\classifier_tester.exe
-  File ${TRAININGDIR}\cntraining.exe
-  File ${TRAININGDIR}\combine_tessdata.exe
-  File ${TRAININGDIR}\dawg2wordlist.exe
-  File ${TRAININGDIR}\mftraining.exe
-  File ${TRAININGDIR}\unicharset_extractor.exe
-  File ${TRAININGDIR}\wordlist2dawg.exe
-  File ${TRAININGDIR}\set_unicharset_properties.exe
-  File ${TRAININGDIR}\shapeclustering.exe
-  File ${TRAININGDIR}\text2image.exe
+  File ${TRAININGDIR}\*.exe
 SectionEnd
 
 !define UNINST_EXE "$INSTDIR\tesseract-uninstall.exe"
