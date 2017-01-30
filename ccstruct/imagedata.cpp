@@ -491,7 +491,7 @@ inT64 DocumentData::UnCache() {
   pages_offset_ = -1;
   set_total_pages(-1);
   set_memory_used(0);
-  tprintf("Unloaded document %s, saving %d memory\n", document_name_.string(),
+  tprintf("Unloaded document %s, saving %lld memory\n", document_name_.string(),
           memory_saved);
   return memory_saved;
 }
