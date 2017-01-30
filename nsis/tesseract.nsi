@@ -207,55 +207,6 @@ OutFile tesseract-ocr-setup.exe
       "Download error. Status of ${Lang}: $0. Click OK to continue." /SD IDOK
 !macroend
 
-!macro Download_Lang_Data_with_Cube Lang
-  ; Download traineddata file.
-  DetailPrint "Download: ${Lang} language files"
-  inetc::get /CAPTION "Downloading ${Lang} language files" \
-      "${GITHUB_RAW_FILE_URL}/${Lang}.cube.fold" $INSTDIR/tessdata/${Lang}.cube.fold \
-      "${GITHUB_RAW_FILE_URL}/${Lang}.cube.lm" $INSTDIR/tessdata/${Lang}.cube.lm \
-      "${GITHUB_RAW_FILE_URL}/${Lang}.cube.nn" $INSTDIR/tessdata/${Lang}.cube.nn \
-      "${GITHUB_RAW_FILE_URL}/${Lang}.cube.params" $INSTDIR/tessdata/${Lang}.cube.params \
-      "${GITHUB_RAW_FILE_URL}/${Lang}.cube.size" $INSTDIR/tessdata/${Lang}.cube.size \
-      "${GITHUB_RAW_FILE_URL}/${Lang}.cube.word-freq" $INSTDIR/tessdata/${Lang}.cube.word-freq \
-      "${GITHUB_RAW_FILE_URL}/${Lang}.traineddata" $INSTDIR/tessdata/${Lang}.traineddata \
-      /END
-    Pop $0 # return value = exit code, "OK" if OK
-    StrCmp $0 "OK" +2
-    MessageBox MB_OK|MB_ICONEXCLAMATION \
-      "Download error. Status of ${Lang}: $0. Click OK to continue." /SD IDOK
-!macroend
-
-!macro Download_Lang_Data_with_Cube_bigrams Lang
-  ; Download traineddata file.
-  DetailPrint "Download: ${Lang} language files"
-  inetc::get /CAPTION "Downloading ${Lang} language files" \
-      "${GITHUB_RAW_FILE_URL}/${Lang}.cube.bigrams" $INSTDIR/tessdata/${Lang}.cube.bigrams \
-      "${GITHUB_RAW_FILE_URL}/${Lang}.cube.fold" $INSTDIR/tessdata/${Lang}.cube.fold \
-      "${GITHUB_RAW_FILE_URL}/${Lang}.cube.lm" $INSTDIR/tessdata/${Lang}.cube.lm \
-      "${GITHUB_RAW_FILE_URL}/${Lang}.cube.nn" $INSTDIR/tessdata/${Lang}.cube.nn \
-      "${GITHUB_RAW_FILE_URL}/${Lang}.cube.params" $INSTDIR/tessdata/${Lang}.cube.params \
-      "${GITHUB_RAW_FILE_URL}/${Lang}.cube.size" $INSTDIR/tessdata/${Lang}.cube.size \
-      "${GITHUB_RAW_FILE_URL}/${Lang}.cube.word-freq" $INSTDIR/tessdata/${Lang}.cube.word-freq \
-      "${GITHUB_RAW_FILE_URL}/${Lang}.traineddata" $INSTDIR/tessdata/${Lang}.traineddata \
-      /END
-    Pop $0 # return value = exit code, "OK" if OK
-    StrCmp $0 "OK" +2
-    MessageBox MB_OK|MB_ICONEXCLAMATION \
-      "Download error. Status of ${Lang}: $0. Click OK to continue." /SD IDOK
-!macroend
-
-!macro Download_Lang_Data_File Lang_File
-  ; Download single file.
-  DetailPrint "Download: ${Lang_File} language file"
-  inetc::get /caption "Downloading ${Lang_File} language file" \
-      "${GITHUB_RAW_FILE_URL}/${Lang_File}" $INSTDIR/tessdata/${Lang_File} \
-      /END
-    Pop $0 # return value = exit code, "OK" if OK
-    StrCmp $0 "OK" +2
-    MessageBox MB_OK|MB_ICONEXCLAMATION \
-      "Download error. Status of ${Lang_File}: $0. Click OK to continue." /SD IDOK
-!macroend
-
 !macro Download_Leptonica DataUrl
   IfFileExists $TEMP/leptonica.zip dlok
   inetc::get /caption "Downloading $1" /popup "" \
@@ -500,7 +451,7 @@ SectionGroup "Additional language data (download)" SecGrp_ALD
 
   Section /o "Arabic" SecLang_ara
     AddSize 27888
-    !insertmacro Download_Lang_Data_with_Cube_bigrams ara
+    !insertmacro Download_Lang_Data ara
   SectionEnd
 
   Section /o "Assamese" SecLang_asm
@@ -660,8 +611,7 @@ SectionGroup "Additional language data (download)" SecGrp_ALD
 
   Section /o "French" SecLang_fra
     AddSize 36504
-    !insertmacro Download_Lang_Data_File fra.tesseract_cube.nn
-    !insertmacro Download_Lang_Data_with_Cube_bigrams fra
+    !insertmacro Download_Lang_Data fra
   SectionEnd
 
   Section /o "French - Middle (ca. 1400-1600)" SecLang_frm
@@ -696,13 +646,6 @@ SectionGroup "Additional language data (download)" SecGrp_ALD
 
   Section /o "Hindi" SecLang_hin
     AddSize 22212
-    !insertmacro Download_Lang_Data_File hin.cube.bigrams
-    !insertmacro Download_Lang_Data_File hin.cube.fold
-    !insertmacro Download_Lang_Data_File hin.cube.lm
-    !insertmacro Download_Lang_Data_File hin.cube.nn
-    !insertmacro Download_Lang_Data_File hin.cube.params
-    !insertmacro Download_Lang_Data_File hin.cube.word-freq
-    !insertmacro Download_Lang_Data_File hin.tesseract_cube.nn
     !insertmacro Download_Lang_Data hin
   SectionEnd
 
@@ -728,8 +671,7 @@ SectionGroup "Additional language data (download)" SecGrp_ALD
 
   Section /o "Italian" SecLang_ita
     AddSize 31980
-    !insertmacro Download_Lang_Data_File ita.tesseract_cube.nn
-    !insertmacro Download_Lang_Data_with_Cube_bigrams ita
+    !insertmacro Download_Lang_Data ita
   SectionEnd
 
   Section /o "Italian (Old)" SecLang_ita_old
@@ -879,7 +821,7 @@ SectionGroup "Additional language data (download)" SecGrp_ALD
 
   Section /o "Russian" SecLang_rus
     AddSize 38472
-    !insertmacro Download_Lang_Data_with_Cube rus
+    !insertmacro Download_Lang_Data rus
   SectionEnd
 
   Section /o "Sanskrit" SecLang_san
@@ -909,7 +851,7 @@ SectionGroup "Additional language data (download)" SecGrp_ALD
 
   Section /o "Spanish" SecLang_spa
     AddSize 38276
-    !insertmacro Download_Lang_Data_with_Cube_bigrams spa
+    !insertmacro Download_Lang_Data spa
   SectionEnd
 
   Section /o "Spanish (Old)" SecLang_spa_old
