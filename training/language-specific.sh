@@ -38,10 +38,21 @@ UNUSABLE_LANGUAGE_CODES="hye div mon snd"
 FRAKTUR_FONTS=(
     "CaslonishFraxx Medium" \
     "Cloister Black, Light" \
-    "Proclamate Light" \
+    "Proclamate Light, Light" \
+    "HumboldtFraktur Bold" \
+    "Kleist-Fraktur" \
+    "TypographerFraktur Bold" \
+    "TypographerFraktur Medium" \
     "UnifrakturMaguntia" \
     "Walbaum-Fraktur" \
+    "WieynkFraktur Bold" \
+    "WieynkFraktur" \
+    "Zentenar Fraktur Bold" \
+    "Zentenar Fraktur" \
 )
+
+#    "DS Caslon Gotisch" \
+#    "Schmalfette Fraktur" \
 
 # List of fonts to train on
 LATIN_FONTS=(
