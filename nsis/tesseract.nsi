@@ -96,7 +96,7 @@ BrandingText /TRIMCENTER "(c) 2010-2015 ${PRODUCT_NAME}"
 !include MultiUser.nsh
 !include Sections.nsh
 !include MUI2.nsh
-!ifdef REGISTR_SETTINGS
+!ifdef REGISTRY_SETTINGS
 !include EnvVarUpdate.nsh
 !endif ; REGISTRY_SETTINGS
 !include LogicLib.nsh
@@ -104,7 +104,7 @@ BrandingText /TRIMCENTER "(c) 2010-2015 ${PRODUCT_NAME}"
 
 # Variables
 Var StartMenuGroup
-!ifdef REGISTR_SETTINGS
+!ifdef REGISTRY_SETTINGS
 Var PathKey
 !endif ; REGISTRY_SETTINGS
 ; Define user variables
@@ -155,7 +155,7 @@ OutFile tesseract-ocr-setup-${VERSION}.exe
 OutFile tesseract-ocr-setup.exe
 !endif
 
-!ifdef REGISTR_SETTINGS
+!ifdef REGISTRY_SETTINGS
 !macro AddToPath
   # TODO(zdenop): Check if $INSTDIR is in path. If yes, do not append it.
   # append bin path to user PATH environment variable
@@ -347,14 +347,11 @@ Section -Main SEC0000
   SetOutPath "$INSTDIR"
   # files included in distribution
   File ${PREFIX}/bin/tesseract.exe
-  File ${PREFIX}/bin/libtesseract-3.dll
+  File ${PREFIX}/bin/libtesseract-*.dll
 !ifdef CROSSBUILD
   File ${SRCDIR}\dll\i686-w64-mingw32\*.dll
 !endif
   File ${SRCDIR}\nsis\tar.exe
-  CreateDirectory "$INSTDIR\java"
-  SetOutPath "$INSTDIR\java"
-  File ..\java\ScrollView.jar
   CreateDirectory "$INSTDIR\tessdata"
   SetOutPath "$INSTDIR\tessdata"
   File ${PREFIX}/share/tessdata/pdf.ttf
@@ -374,20 +371,19 @@ Section -Main SEC0000
 ##  File ${SRCDIR}\ReleaseNotes
 SectionEnd
 
+Section "ScrollView" SecScrollView
+  SectionIn 1
+  CreateDirectory "$INSTDIR\java"
+  SetOutPath "$INSTDIR\java"
+  File ..\java\ScrollView.jar
+  File ..\java\piccolo2d-core-3.0.jar
+  File ..\java\piccolo2d-extras-3.0.jar
+SectionEnd
+
 Section "Training Tools" SecTr
   SectionIn 1
   SetOutPath "$INSTDIR"
-  File ${TRAININGDIR}\ambiguous_words.exe
-  File ${TRAININGDIR}\classifier_tester.exe
-  File ${TRAININGDIR}\cntraining.exe
-  File ${TRAININGDIR}\combine_tessdata.exe
-  File ${TRAININGDIR}\dawg2wordlist.exe
-  File ${TRAININGDIR}\mftraining.exe
-  File ${TRAININGDIR}\unicharset_extractor.exe
-  File ${TRAININGDIR}\wordlist2dawg.exe
-  File ${TRAININGDIR}\set_unicharset_properties.exe
-  File ${TRAININGDIR}\shapeclustering.exe
-  File ${TRAININGDIR}\text2image.exe
+  File ${TRAININGDIR}\*.exe
 SectionEnd
 
 !define UNINST_EXE "$INSTDIR\tesseract-uninstall.exe"
@@ -1084,12 +1080,12 @@ Section -un.Main UNSEC0000
   DetailPrint "Removing registry info"
   DeleteRegKey HKLM "Software\Tesseract-OCR"
   SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
-+!ifdef REGISTR_SETTINGS
+!ifdef REGISTRY_SETTINGS
   ${un.EnvVarUpdate} $0 "PATH" "R" HKLM $INSTDIR
   SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
   DeleteRegValue HKLM "Environment" "TESSDATA_PREFIX"
   SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
-+!endif ; REGISTRY_SETTINGS
+!endif ; REGISTRY_SETTINGS
 
   # remove the Add/Remove information
   DeleteRegKey HKLM "${UNINST_KEY}"
