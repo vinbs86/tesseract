@@ -658,7 +658,7 @@ void ResultIterator::IterateAndAppendUTF8TextlineText(STRING *text) {
   }
   *text += line_separator_;
   // If we just finished a paragraph, add an extra newline.
-  if (it_->block() == NULL || IsAtBeginningOf(RIL_PARA))
+  if (IsAtBeginningOf(RIL_PARA))
     *text += paragraph_separator_;
 }
 
@@ -673,11 +673,16 @@ void ResultIterator::AppendUTF8ParagraphText(STRING *text) const {
 }
 
 bool ResultIterator::BidiDebug(int min_level) const {
-  int debug_level = 1;
-  IntParam *p = ParamUtils::FindParam<IntParam>(
+  static int debug_level = -1;
+  if (debug_level == -1) {
+    IntParam *p = ParamUtils::FindParam<IntParam>(
       "bidi_debug", GlobalParams()->int_params,
       tesseract_->params()->int_params);
-  if (p != NULL) debug_level = (inT32)(*p);
+    if (p == NULL)
+      debug_level = 1;
+    else
+      debug_level = (inT32)(*p);
+  }
   return debug_level >= min_level;
 }
 
